@@ -37,7 +37,7 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
  <section class="panel"><h2>2 · Reglas de señal</h2>
   <div class="field"><label>Ventana de comparación (1–50 velas)</label><input id="window" type="number" min="1" max="50" step="1" value="20" inputmode="numeric" placeholder="Escribe un número de 1 a 50" aria-label="Escribe la ventana de comparación entre 1 y 50"></div>
   <div class="field"><label>Cuerpo pequeño (%)</label><input id="small" type="number" min="1" max="80" value="30"></div>
-  <div class="hint">La divergencia se detecta automáticamente: la vela señal debe tener cuerpo pequeño y volumen superior al de todas las velas anteriores de mayor cuerpo dentro de esta ventana. No se fija un porcentaje de volumen. En el CSV XAUUSD M15 aportado, con ventana 20 y cuerpo 30 %, esta regla identifica 417 operaciones no solapadas. Motor experimental; todavía no equivale a las cinco confirmaciones multitemporales.</div>
+  <div class="hint">La divergencia se detecta automáticamente: vela pequeña con volumen superior al de las velas de mayor cuerpo en la ventana. Dirección: en rango, BUY si la vela divergente cierra verde y SELL si cierra roja. En tendencia marcada, una vela divergente pequeña aislada de color contrario conserva la dirección de la tendencia. La tendencia se estima con el desplazamiento neto de las velas de comparación frente al ATR. Motor experimental; requiere validación visual.</div>
  </section>
  <section class="panel"><h2>3 · Gestión de riesgo</h2>
   <div class="grid2"><div class="field"><label>Stop (ATR ×)</label><input id="atr" type="number" min=".2" max="10" step=".1" value="1"></div><div class="field"><label>Take Profit (R:R)</label><input id="rr" type="number" min=".2" max="10" step=".1" value="2"></div></div>
@@ -106,7 +106,16 @@ function backtest(){
    const isSmall=body/range<=small||(avgBody>0&&body<=avgBody*.5);
    const hasVolumeDivergence=largerWithVolume.length>0&&largerWithVolume.every(x=>b.volume>x.volume);
    if(isSmall&&hasVolumeDivergence&&b.close!==b.open){
-    const dir=b.close>b.open?1:-1,entryBar=i+1,entry=bars[entryBar].open+(dir*cost/2),risk=Math.max(atrAt(i,an)*ap,range*.25),sl=entry-dir*risk,tp=entry+dir*risk*rr;
+    // Dirección de entrada: en rango sigue el color de la vela divergente.
+    // En tendencia marcada, una vela pequeña aislada de color contrario NO revierte la tendencia.
+    const priorFirst=prior[0],priorLast=prior[prior.length-1];
+    const trendMove=priorLast.close-priorFirst.open;
+    const trendAtr=atrAt(i,an);
+    const trendMarked=Math.abs(trendMove)>=trendAtr*0.5;
+    const trendDir=trendMove>0?1:trendMove<0?-1:0;
+    const candleDir=b.close>b.open?1:-1;
+    const dir=trendMarked&&trendDir!==0?trendDir:candleDir;
+    const entryBar=i+1,entry=bars[entryBar].open+(dir*cost/2),risk=Math.max(atrAt(i,an)*ap,range*.25),sl=entry-dir*risk,tp=entry+dir*risk*rr;
     let exit=entryBar,price=bars[entryBar].close,reason='Fin de datos';
     for(let k=entryBar;k<bars.length;k++){const x=bars[k],hitSL=dir===1?x.low<=sl:x.high>=sl,hitTP=dir===1?x.high>=tp:x.low<=tp;if(hitSL||hitTP){exit=k;if(hitSL&&hitTP){price=sl;reason='SL (ambos niveles en misma vela; criterio conservador)'}else if(hitSL){price=sl;reason='Stop Loss'}else{price=tp;reason='Take Profit'}break}price=x.close}
     const pnl=(price-entry)*dir-cost;

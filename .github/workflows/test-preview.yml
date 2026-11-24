@@ -14,13 +14,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: feature/contextual-volume-backtesting
+      - name: Syntax-check research engines
+        run: |
+          node --check volume-pattern-engine.js
+          node --check wyckoff-range-engine.js
+          node --check wyckoff-validation-engine.js
       - name: Package static test site
         run: |
           mkdir -p preview
-          cp index.html volume-pattern-engine.js wyckoff-range-engine.js preview/
+          cp index.html volume-pattern-engine.js wyckoff-range-engine.js wyckoff-validation-engine.js preview/
           test -s preview/index.html
-          test -s preview/volume-pattern-engine.js
-          test -s preview/wyckoff-range-engine.js
+          test -s preview/wyckoff-validation-engine.js
       - name: Upload isolated preview
         uses: actions/upload-artifact@v4
         with:

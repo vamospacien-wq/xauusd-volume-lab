@@ -36,8 +36,7 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
  </section>
  <section class="panel"><h2>2 · Reglas de señal</h2>
   <div class="grid2"><div class="field"><label>Velas anteriores a comparar</label><select id="divBars"><option value="3">3 velas</option><option value="5" selected>5 velas</option><option value="7">7 velas</option></select></div><div class="field"><label>Rango total pequeño (%)</label><input id="rangeSmall" type="number" min="10" max="90" value="60"></div></div>
-  <div class="grid2"><div class="field"><label>Volumen comparable mínimo (%)</label><input id="volComparable" type="number" min="10" max="150" value="80"></div><div class="field"><label>Coincidencias mínimas</label><input id="minMatches" type="number" min="1" max="7" value="2"></div></div>
-  <div class="hint">Divergencia por comparación individual: la vela candidata debe tener un rango completo (mecha a mecha) pequeño frente a las velas anteriores. Su volumen se compara una por una con las velas anteriores de mayor rango; no se usa el promedio ni se exige que sea el máximo. En rango, BUY si cierra verde y SELL si cierra roja. En tendencia marcada, una vela pequeña aislada de color contrario conserva la dirección de la tendencia. Hipótesis experimental: valida visualmente y fuera de muestra.</div>
+  <div class="hint">Regla estricta de divergencia: la vela candidata debe tener un rango total pequeño (mecha a mecha) frente a las velas anteriores seleccionadas Y su volumen debe ser estrictamente superior al volumen de CADA una de las 3, 5 o 7 velas anteriores. Si una sola vela anterior tiene volumen igual o mayor, se descarta la señal. No se usan promedios ni coincidencias parciales. En tendencia marcada se conserva la dirección de la tendencia; fuera de tendencia se sigue el color de la vela candidata. La entrada se simula en la apertura de la vela siguiente para evitar anticipación.</div>
  </section>
  <section class="panel"><h2>3 · Gestión de riesgo</h2>
   <div class="grid2"><div class="field"><label>Stop (ATR ×)</label><input id="atr" type="number" min=".2" max="10" step=".1" value="1"></div><div class="field"><label>Take Profit (R:R)</label><input id="rr" type="number" min=".2" max="10" step=".1" value="2"></div></div>
@@ -81,9 +80,9 @@ function parseCSV(text){
 function atrAt(i,n){let sum=0,c=0;for(let k=Math.max(1,i-n+1);k<=i;k++){let b=bars[k],p=bars[k-1],tr=Math.max(b.high-b.low,Math.abs(b.high-p.close),Math.abs(b.low-p.close));sum+=tr;c++}return c?sum/c:(bars[i].high-bars[i].low)}
 let backtestRunId=0;
 function backtest(){
- const win=Number($('divBars').value),rangeSmallPct=Number($('rangeSmall').value)/100,volComparablePct=Number($('volComparable').value)/100,minMatches=Number($('minMatches').value);
+ const win=Number($('divBars').value),rangeSmallPct=Number($('rangeSmall').value)/100;
  const ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value,beR=+$('beTrigger').value;
- if(![3,5,7].includes(win)||!Number.isFinite(rangeSmallPct)||rangeSmallPct<.1||rangeSmallPct>.9||!Number.isFinite(volComparablePct)||volComparablePct<.1||volComparablePct>1.5||!Number.isInteger(minMatches)||minMatches<1||minMatches>win||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0||![2,3].includes(beR)){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
+ if(![3,5,7].includes(win)||!Number.isFinite(rangeSmallPct)||rangeSmallPct<.1||rangeSmallPct>.9||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0||![2,3].includes(beR)){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
  const runId=++backtestRunId,chunkTrades=50,maxTrades=500,chunkBars=900;
  trades=[];selected=-1;let i=win+an,firstPaint=true;
  $('run').disabled=true;$('run').textContent='Analizando… 0 / 500';
@@ -94,7 +93,7 @@ function backtest(){
   $('run').disabled=false;$('run').textContent='Ejecutar backtesting';
   if(done&&trades.length){if(firstPaint)focusTrade(0);else{renderTrades();stats();draw()}}
   if(!trades.length){$('chartmeta').textContent='No se detectaron configuraciones válidas con los parámetros actuales de divergencia y tendencia.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.'}
-  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Divergencia comparada individualmente con '+win+' velas; dirección según tendencia marcada o color de la vela divergente. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Límite de 500 operaciones mostradas.':' Historial completo examinado.');
+  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Solo se aceptó volumen candidato superior al de CADA una de las '+win+' velas anteriores, más rango pequeño y dirección según tendencia/color. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Límite de 500 operaciones mostradas.':' Historial completo examinado.');
  }
  function processChunk(){
   if(runId!==backtestRunId)return;
@@ -104,12 +103,11 @@ function backtest(){
    const prior=bars.slice(i-win,i);
    const priorRanges=prior.map(x=>Math.max(0,x.high-x.low)).sort((a,b)=>a-b);
    const medianPriorRange=priorRanges.length%2?priorRanges[(priorRanges.length-1)/2]:(priorRanges[priorRanges.length/2-1]+priorRanges[priorRanges.length/2])/2;
-   const largerRangeBars=prior.filter(x=>(x.high-x.low)>range);
    const isSmall=medianPriorRange>0&&range<=medianPriorRange*rangeSmallPct;
-   // Compare the candidate volume individually against each prior candle with a larger full range.
-   // No average-volume rule and no requirement to exceed the largest volume in the window.
-   const comparableVolumeMatches=largerRangeBars.filter(x=>Number(x.volume)>0&&Number(b.volume)>=Number(x.volume)*volComparablePct).length;
-   const hasVolumeDivergence=comparableVolumeMatches>=minMatches;
+   // Regla señalada en las capturas: el volumen candidato debe superar INDIVIDUALMENTE
+   // el volumen de todas las velas de la ventana anterior (3, 5 o 7). Una sola excepción invalida.
+   // No se filtra por tamaño de las velas comparadas, no hay promedio ni coincidencias parciales.
+   const hasVolumeDivergence=prior.every(x=>Number(b.volume)>Number(x.volume));
    if(isSmall&&hasVolumeDivergence&&b.close!==b.open){
     // Dirección de entrada: en rango sigue el color de la vela divergente.
     // En tendencia marcada, una vela pequeña aislada de color contrario NO revierte la tendencia.
@@ -149,7 +147,7 @@ function backtest(){
   }
   if(runId!==backtestRunId)return;
   $('run').textContent='Analizando… '+trades.length+' / 500';
-  $('status').textContent='Backtesting progresivo: '+trades.length+' operaciones encontradas · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. Se añadirán automáticamente los siguientes bloques de 50.';
+  $('status').textContent='Backtesting progresivo: '+trades.length+' operaciones encontradas · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. Filtro estricto: volumen superior a cada una de las '+win+' velas anteriores. Se añadirán automáticamente los siguientes bloques de 50.';
   $('tradeCounter').textContent=trades.length+' / '+maxTrades;
   renderTrades();stats();
   if(firstPaint&&trades.length){firstPaint=false;focusTrade(0)}else if(trades.length)draw();

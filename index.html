@@ -83,6 +83,7 @@ function backtest(){
  const rawWin=$('window').value,win=Number(rawWin);if(!Number.isInteger(win)||win<1||win>50){$('status').textContent='La ventana de comparación debe ser un número entero entre 1 y 50.';$('window').focus();return}
  const small=+$('small').value/100,ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value;
  if(!Number.isFinite(small)||small<=0||small>0.8||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0){$('status').textContent='Revisa los parámetros: introduce valores válidos y positivos.';return}
+ const research=window.VolumePatternResearch?window.VolumePatternResearch.analyze(bars,{lookback:win,horizons:[1,3,5,10]}):null;
  const runId=++backtestRunId,chunkTrades=50,maxTrades=500,chunkBars=900;
  trades=[];selected=-1;let i=win+an,firstPaint=true;
  $('run').disabled=true;$('run').textContent='Analizando… 0 / 500';
@@ -92,8 +93,8 @@ function backtest(){
   if(runId!==backtestRunId)return;
   $('run').disabled=false;$('run').textContent='Ejecutar backtesting';
   if(done&&trades.length){if(firstPaint)focusTrade(0);else{renderTrades();stats();draw()}}
-  if(!trades.length){$('chartmeta').textContent='No se detectaron divergencias con estos parámetros. Prueba otra ventana o ajusta el tamaño de cuerpo pequeño.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.'}
-  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas encontradas en '+bars.length.toLocaleString()+' velas.'+(trades.length>=maxTrades?' Se alcanzó el límite de 500 operaciones mostradas.':' Se analizaron todas las velas; no se inventaron señales.');
+  if(!trades.length){$('chartmeta').textContent='No se detectaron divergencias con estos parámetros. Prueba otra ventana o ajusta el tamaño de cuerpo pequeño.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.'+(research?' · '+research.summary.candidates+' candidatos contextuales de volumen registrados para estudio.':'')}
+  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas encontradas en '+bars.length.toLocaleString()+' velas.'+(trades.length>=maxTrades?' Se alcanzó el límite de 500 operaciones mostradas.':' Se analizaron todas las velas; no se inventaron señales.')+(research?' · '+research.summary.candidates+' candidatos contextuales de volumen registrados para estudio.':'');
  }
  function processChunk(){
   if(runId!==backtestRunId)return;

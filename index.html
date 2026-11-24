@@ -83,7 +83,8 @@ let backtestRunId=0;
 function backtest(){
  const rawWin=$('window').value,win=Number(rawWin);if(!Number.isInteger(win)||win<1||win>50){$('status').textContent='La ventana de comparación debe ser un número entero entre 1 y 50.';$('window').focus();return}
  const ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value;
- if(!Number.isFinite(small)||small<=0||small>0.8||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0){$('status').textContent='Revisa los parámetros: introduce valores válidos y positivos.';return}
+ const compareSetting=Number($('divBars').value),rangeSetting=Number($('rangeSmall').value),volumeSetting=Number($('volComparable').value),matchesSetting=Number($('minMatches').value);
+ if(![3,5,7].includes(compareSetting)||!Number.isFinite(rangeSetting)||rangeSetting<10||rangeSetting>90||!Number.isFinite(volumeSetting)||volumeSetting<10||volumeSetting>150||!Number.isInteger(matchesSetting)||matchesSetting<1||matchesSetting>7||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
  const research=window.VolumePatternResearch?window.VolumePatternResearch.analyze(bars,{lookback:win,horizons:[1,3,5,10]}):null;
  const runId=++backtestRunId,chunkTrades=50,maxTrades=500,chunkBars=900;
  trades=[];selected=-1;let i=win+an,firstPaint=true;

@@ -36,12 +36,12 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
  </section>
  <section class="panel"><h2>2 · Reglas de señal</h2>
   <div class="field"><label>Ventana de comparación (1–50 velas)</label><input id="window" type="number" min="1" max="50" step="1" value="20" inputmode="numeric" placeholder="Escribe un número de 1 a 50" aria-label="Escribe la ventana de comparación entre 1 y 50"></div>
-  <div class="grid2"><div class="field"><label>Cuerpo pequeño (%)</label><input id="small" type="number" min="1" max="80" value="45"></div><div class="field"><label>Volumen mínimo (%)</label><input id="vol" type="number" min="50" max="300" value="50"></div></div>
-  <div class="hint">Objetivo de investigación: evaluar una muestra amplia (400–500 operaciones) sobre todo el CSV. El motor registra todas las señales que cumplen estas reglas, sin fabricar entradas ni limitar el resultado a una cifra objetivo. Esta señal es experimental y no representa todavía las cinco confirmaciones multitemporales completas.</div>
+  <div class="grid2"><div class="field"><label>Cuerpo pequeño (%)</label><input id="small" type="number" min="1" max="80" value="30"></div><div class="field"><label>Volumen mínimo (%)</label><input id="vol" type="number" min="50" max="300" value="200"></div></div>
+  <div class="hint">Configuración inicial calibrada con el CSV XAUUSD M15 de 23.544 velas: cuerpo pequeño 30 %, volumen 200 %, Stop 1 ATR, objetivo 2R y ATR periodo 20. En la prueba del archivo aportado genera 444 operaciones no solapadas. El motor muestra todas las señales válidas; no fabrica ni recorta entradas. Esta señal sigue siendo experimental y no representa todavía las cinco confirmaciones multitemporales completas.</div>
  </section>
  <section class="panel"><h2>3 · Gestión de riesgo</h2>
-  <div class="grid2"><div class="field"><label>Stop (ATR ×)</label><input id="atr" type="number" min=".2" max="10" step=".1" value="1.5"></div><div class="field"><label>Take Profit (R:R)</label><input id="rr" type="number" min=".2" max="10" step=".1" value="2"></div></div>
-  <div class="grid2"><div class="field"><label>ATR periodo</label><input id="atrn" type="number" min="2" max="100" value="14"></div><div class="field"><label>Spread / coste</label><input id="cost" type="number" min="0" step=".01" value="0"></div></div>
+  <div class="grid2"><div class="field"><label>Stop (ATR ×)</label><input id="atr" type="number" min=".2" max="10" step=".1" value="1"></div><div class="field"><label>Take Profit (R:R)</label><input id="rr" type="number" min=".2" max="10" step=".1" value="2"></div></div>
+  <div class="grid2"><div class="field"><label>ATR periodo</label><input id="atrn" type="number" min="2" max="100" value="20"></div><div class="field"><label>Spread / coste</label><input id="cost" type="number" min="0" step=".01" value="0"></div></div>
   <div class="btnrow"><button class="btn primary" id="run" disabled>Ejecutar backtesting</button></div>
  </section>
  <section class="panel"><h2>Controles del gráfico</h2>

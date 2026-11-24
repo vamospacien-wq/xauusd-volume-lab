@@ -35,8 +35,8 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
   <div class="status" id="status" style="margin-top:12px">Esperando un CSV. Los datos de ejemplo son sintéticos y solo sirven para probar la interfaz.</div>
  </section>
  <section class="panel"><h2>2 · Reglas de señal</h2>
-  <div class="grid2"><div class="field"><label>Ventana para localizar la vela mínima</label><select id="divBars"><option value="15" selected>15 velas anteriores</option><option value="20">20 velas anteriores</option></select></div><div class="field"><label>Tamaño mínimo de la vela grande de referencia</label><select id="largeRangeFactor"><option value="1.5" selected>Al menos 1,5 veces</option><option value="2">Al menos 2 veces</option><option value="3">Al menos 3 veces</option></select></div></div>
-  <div class="hint"><b>Patrón de divergencia M15:</b> la vela candidata debe ser la de menor rango total (mecha superior a mecha inferior) frente a las 15 o 20 velas anteriores. Dentro de esa ventana se buscan velas claramente más grandes. La señal solo existe si el volumen de la vela pequeña es igual o superior al volumen más alto de esas velas grandes. No se compara indiscriminadamente con todas las velas, no se usan promedios ni coincidencias parciales. La dirección parte del color de la vela pequeña, respetando la excepción de tendencia ya configurada. La operación se simula en la apertura de la vela siguiente.</div>
+  <div class="field"><label for="divBars">Ventana de comparación (velas anteriores, editable)</label><input id="divBars" type="number" min="2" max="500" step="1" value="20"></div>
+  <div class="hint"><b>Patrón de divergencia M15:</b> se buscan únicamente velas candidatas que sean la más pequeña de su ventana, midiendo el rango completo desde la mecha inferior hasta la superior. Para validar el volumen, se compara esa candidata solo con las velas anteriores cuyo rango sea mayor que el suyo, sin exigir un tamaño mínimo, múltiplo ni porcentaje. No se filtra por color de las velas de referencia: pueden ser alcistas o bajistas. La candidata debe tener un volumen igual o superior al mayor volumen de esas velas de mayor rango. La dirección de la operación sigue el color de la candidata, salvo la excepción de tendencia ya configurada. La entrada se simula en la apertura de la vela siguiente.</div>
  </section>
  <section class="panel"><h2>3 · Gestión de riesgo</h2>
   <div class="grid2"><div class="field"><label>Stop (ATR ×)</label><input id="atr" type="number" min=".2" max="10" step=".1" value="1"></div><div class="field"><label>Take Profit (R:R)</label><input id="rr" type="number" min=".2" max="10" step=".1" value="2"></div></div>
@@ -80,20 +80,20 @@ function parseCSV(text){
 function atrAt(i,n){let sum=0,c=0;for(let k=Math.max(1,i-n+1);k<=i;k++){let b=bars[k],p=bars[k-1],tr=Math.max(b.high-b.low,Math.abs(b.high-p.close),Math.abs(b.low-p.close));sum+=tr;c++}return c?sum/c:(bars[i].high-bars[i].low)}
 let backtestRunId=0;
 function backtest(){
- const win=Number($('divBars').value),largeRangeFactor=Number($('largeRangeFactor').value);
+ const win=Number($('divBars').value);
  const ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value,beR=+$('beTrigger').value;
- if(![15,20].includes(win)||![1.5,2,3].includes(largeRangeFactor)||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0||![2,3].includes(beR)){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
- const runId=++backtestRunId,chunkTrades=50,maxTrades=500,chunkBars=900;
+ if(!Number.isInteger(win)||win<2||win>500||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0||![2,3].includes(beR)){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
+ const runId=++backtestRunId,chunkTrades=50,maxTrades=700,chunkBars=900;
  trades=[];selected=-1;let i=Math.max(win,an),firstPaint=true;
- $('run').disabled=true;$('run').textContent='Analizando… 0 / 500';
+ $('run').disabled=true;$('run').textContent='Analizando… 0 / 700';
  $('status').textContent='Preparando el análisis progresivo del historial completo…';
- $('tradeCounter').textContent='0 / 500';stats();renderTrades();
+ $('tradeCounter').textContent='0 / 700';stats();renderTrades();
  function finish(done){
   if(runId!==backtestRunId)return;
   $('run').disabled=false;$('run').textContent='Ejecutar backtesting';
   if(done&&trades.length){if(firstPaint)focusTrade(0);else{renderTrades();stats();draw()}}
   if(!trades.length){$('chartmeta').textContent='No se detectaron configuraciones válidas con los parámetros actuales de divergencia y tendencia.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.'}
-  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Se exigió la vela de menor rango de las '+win+' anteriores y volumen igual/superior al máximo de las velas al menos '+largeRangeFactor+'x mayores; dirección según color/excepción de tendencia. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Límite de 500 operaciones mostradas.':' Historial completo examinado.');
+  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Se exigió la vela más pequeña de cada ventana de '+win+' velas y volumen igual/superior al mayor volumen de las velas anteriores de mayor rango, sin filtro de color ni tamaño mínimo; dirección según color/excepción de tendencia. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Límite de 500 operaciones mostradas.':' Historial completo examinado.');
  }
  function processChunk(){
   if(runId!==backtestRunId)return;
@@ -105,7 +105,7 @@ function backtest(){
    // La candidata debe ser estrictamente la vela de menor rango de la ventana anterior.
    const isSmallest=priorRanges.every(r=>range<r);
    // Solo comparar contra velas cuyo rango sea claramente mayor que el de la candidata.
-   const largerBars=prior.filter(x=>(x.high-x.low)>=range*largeRangeFactor);
+   const largerBars=prior.filter(x=>(x.high-x.low)>range);
    // La divergencia ocurre cuando la vela pequeña negocia tanto volumen como
    // la vela de mayor volumen dentro del grupo de velas mucho más grandes.
    const referenceVolume=largerBars.length?Math.max(...largerBars.map(x=>Number(x.volume)||0)):Infinity;
@@ -148,8 +148,8 @@ function backtest(){
    scanned+=Math.max(1,i-signalIndex);
   }
   if(runId!==backtestRunId)return;
-  $('run').textContent='Analizando… '+trades.length+' / 500';
-  $('status').textContent='Backtesting progresivo: '+trades.length+' operaciones encontradas · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. Filtro: vela más pequeña de '+win+' anteriores y volumen comparable con velas al menos '+largeRangeFactor+'x mayores. Se añadirán automáticamente los siguientes bloques de 50.';
+  $('run').textContent='Analizando… '+trades.length+' / 700';
+  $('status').textContent='Backtesting progresivo: '+trades.length+' operaciones encontradas · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. Filtro: vela más pequeña de '+win+' anteriores; compara volumen solo con velas de mayor rango, sin múltiplos ni filtro de color. Se añadirán automáticamente los siguientes bloques de 50.';
   $('tradeCounter').textContent=trades.length+' / '+maxTrades;
   renderTrades();stats();
   if(firstPaint&&trades.length){firstPaint=false;focusTrade(0)}else if(trades.length)draw();

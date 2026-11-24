@@ -36,7 +36,6 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
  </section>
  <section class="panel"><h2>2 · Reglas de señal</h2>
   <div class="field"><label>Ventana de comparación (1–50 velas)</label><input id="window" type="number" min="1" max="50" step="1" value="20" inputmode="numeric" placeholder="Escribe un número de 1 a 50" aria-label="Escribe la ventana de comparación entre 1 y 50"></div>
-  <div class="field"><label>Cuerpo pequeño (%)</label><input id="small" type="number" min="1" max="80" value="30"></div>
   <div class="grid2"><div class="field"><label>Velas anteriores a comparar</label><select id="divBars"><option value="3">3 velas</option><option value="5" selected>5 velas</option><option value="7">7 velas</option></select></div><div class="field"><label>Rango total pequeño (%)</label><input id="rangeSmall" type="number" min="10" max="90" value="60"></div></div>
   <div class="grid2"><div class="field"><label>Volumen comparable mínimo (%)</label><input id="volComparable" type="number" min="10" max="150" value="80"></div><div class="field"><label>Coincidencias mínimas</label><input id="minMatches" type="number" min="1" max="7" value="2"></div></div>
   <div class="hint">Nueva divergencia por comparación individual: la vela candidata debe tener un rango total (mecha a mecha) pequeño frente a las velas anteriores de mayor recorrido. Su volumen se compara una por una con esas velas; no se usa el promedio ni se exige que sea el máximo de la ventana. Por defecto, con 5 velas anteriores, debe igualar al menos el 80% del volumen de 2 velas anteriores de mayor rango. Se puede probar con 3, 5 o 7 velas y ajustar la tolerancia. En rango, BUY si cierra verde y SELL si cierra roja. En tendencia marcada, una vela pequeña aislada de color contrario conserva la dirección de la tendencia. Hipótesis experimental; validar visualmente y fuera de muestra.</div>
@@ -83,7 +82,7 @@ function atrAt(i,n){let sum=0,c=0;for(let k=Math.max(1,i-n+1);k<=i;k++){let b=ba
 let backtestRunId=0;
 function backtest(){
  const rawWin=$('window').value,win=Number(rawWin);if(!Number.isInteger(win)||win<1||win>50){$('status').textContent='La ventana de comparación debe ser un número entero entre 1 y 50.';$('window').focus();return}
- const small=+$('small').value/100,ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value;
+ const ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value;
  if(!Number.isFinite(small)||small<=0||small>0.8||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0){$('status').textContent='Revisa los parámetros: introduce valores válidos y positivos.';return}
  const research=window.VolumePatternResearch?window.VolumePatternResearch.analyze(bars,{lookback:win,horizons:[1,3,5,10]}):null;
  const runId=++backtestRunId,chunkTrades=50,maxTrades=500,chunkBars=900;
@@ -111,7 +110,7 @@ function backtest(){
    const priorRanges=comparison.map(x=>Math.max(0,x.high-x.low));
    const largerRangeBars=comparison.filter(x=>(x.high-x.low)>range);
    const typicalPriorRange=priorRanges.length?priorRanges.slice().sort((a,b)=>a-b)[Math.floor(priorRanges.length/2)]:0;
-   const isSmall=range<=typicalPriorRange*rangeSmallPct && (body/range<=small || (avgBody>0&&body<=avgBody*.5));
+   const isSmall=range<=typicalPriorRange*rangeSmallPct;
    // Compare volume candle-by-candle only against prior candles with a larger high-to-low range.
    // A candidate need not exceed the maximum or the average volume of the window.
    const comparableMatches=largerRangeBars.filter(x=>Number(x.volume)>0&&Number(b.volume)>=Number(x.volume)*volComparablePct).length;

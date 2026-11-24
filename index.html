@@ -77,29 +77,54 @@ function parseCSV(text){
  return out.sort((a,b)=>String(a.time).localeCompare(String(b.time)));
 }
 function atrAt(i,n){let sum=0,c=0;for(let k=Math.max(1,i-n+1);k<=i;k++){let b=bars[k],p=bars[k-1],tr=Math.max(b.high-b.low,Math.abs(b.high-p.close),Math.abs(b.low-p.close));sum+=tr;c++}return c?sum/c:(bars[i].high-bars[i].low)}
+let backtestRunId=0;
 function backtest(){
  const rawWin=$('window').value,win=Number(rawWin);if(!Number.isInteger(win)||win<1||win>50){$('status').textContent='La ventana de comparación debe ser un número entero entre 1 y 50.';$('window').focus();return}
- trades=[];let small=+$('small').value/100,ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value;
+ const small=+$('small').value/100,ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value;
  if(!Number.isFinite(small)||small<=0||small>0.8||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0){$('status').textContent='Revisa los parámetros: introduce valores válidos y positivos.';return}
- let i=win+an;
- while(i<bars.length-2){
-  const b=bars[i],range=Math.max(1e-12,b.high-b.low),body=Math.abs(b.close-b.open);
-  const prior=bars.slice(i-win,i),priorBodies=prior.map(x=>Math.abs(x.close-x.open));
-  const avgBody=priorBodies.reduce((a,v)=>a+v,0)/Math.max(1,priorBodies.length);
-  const large=prior.filter(x=>Math.abs(x.close-x.open)>body);
-  const largerWithVolume=large.filter(x=>Number.isFinite(x.volume)&&x.volume>0);
-  const isSmall=body/range<=small || (avgBody>0 && body<=avgBody*.5);
-  // Divergencia: la vela pequeña supera el volumen de TODAS las velas de mayor cuerpo en la ventana.
-  const hasVolumeDivergence=largerWithVolume.length>0 && largerWithVolume.every(x=>b.volume>x.volume);
-  if(isSmall&&hasVolumeDivergence&&b.close!==b.open){
-   let dir=b.close>b.open?1:-1,entryBar=i+1,entry=bars[entryBar].open+(dir*cost/2),risk=Math.max(atrAt(i,an)*ap,range*.25),sl=entry-dir*risk,tp=entry+dir*risk*rr,exit=entryBar,price=bars[entryBar].close,reason='Fin de datos';
-   for(let k=entryBar;k<bars.length;k++){let x=bars[k],hitSL=dir===1?x.low<=sl:x.high>=sl,hitTP=dir===1?x.high>=tp:x.low<=tp;if(hitSL||hitTP){exit=k;if(hitSL&&hitTP){price=sl;reason='SL (ambos niveles en misma vela; criterio conservador)'}else if(hitSL){price=sl;reason='Stop Loss'}else{price=tp;reason='Take Profit'}break}price=x.close}
-   let pnl=(price-entry)*dir-cost;
-   trades.push({id:trades.length+1,dir,signal:i,entryIndex:entryBar,exitIndex:exit,entry,sl,tp,exit:price,pnl,reason,time:bars[entryBar].time,exitTime:bars[exit].time});
-   i=exit+1;
-  }else i++;
+ const runId=++backtestRunId,chunkTrades=50,maxTrades=500,chunkBars=900;
+ trades=[];selected=-1;let i=win+an,firstPaint=true;
+ $('run').disabled=true;$('run').textContent='Analizando… 0 / 500';
+ $('status').textContent='Preparando el análisis progresivo del historial completo…';
+ $('tradeCounter').textContent='0 / 500';stats();renderTrades();
+ function finish(done){
+  if(runId!==backtestRunId)return;
+  $('run').disabled=false;$('run').textContent='Ejecutar backtesting';
+  if(done&&trades.length){if(firstPaint)focusTrade(0);else{renderTrades();stats();draw()}}
+  if(!trades.length){$('chartmeta').textContent='No se detectaron divergencias con estos parámetros. Prueba otra ventana o ajusta el tamaño de cuerpo pequeño.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.'}
+  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas encontradas en '+bars.length.toLocaleString()+' velas.'+(trades.length>=maxTrades?' Se alcanzó el límite de 500 operaciones mostradas.':' Se analizaron todas las velas; no se inventaron señales.');
  }
- selected=trades.length?0:-1;renderTrades();stats();if(trades.length)focusTrade(0);else{$('chartmeta').textContent='No se detectaron divergencias con estos parámetros. Prueba otra ventana o ajusta el tamaño de cuerpo pequeño.';draw()}
+ function processChunk(){
+  if(runId!==backtestRunId)return;
+  let added=0,scanned=0;
+  while(i<bars.length-2&&trades.length<maxTrades&&added<chunkTrades&&scanned<chunkBars){
+   const signalIndex=i,b=bars[i],range=Math.max(1e-12,b.high-b.low),body=Math.abs(b.close-b.open);
+   const prior=bars.slice(i-win,i),priorBodies=prior.map(x=>Math.abs(x.close-x.open));
+   const avgBody=priorBodies.reduce((a,v)=>a+v,0)/Math.max(1,priorBodies.length);
+   const large=prior.filter(x=>Math.abs(x.close-x.open)>body);
+   const largerWithVolume=large.filter(x=>Number.isFinite(x.volume)&&x.volume>0);
+   const isSmall=body/range<=small||(avgBody>0&&body<=avgBody*.5);
+   const hasVolumeDivergence=largerWithVolume.length>0&&largerWithVolume.every(x=>b.volume>x.volume);
+   if(isSmall&&hasVolumeDivergence&&b.close!==b.open){
+    const dir=b.close>b.open?1:-1,entryBar=i+1,entry=bars[entryBar].open+(dir*cost/2),risk=Math.max(atrAt(i,an)*ap,range*.25),sl=entry-dir*risk,tp=entry+dir*risk*rr;
+    let exit=entryBar,price=bars[entryBar].close,reason='Fin de datos';
+    for(let k=entryBar;k<bars.length;k++){const x=bars[k],hitSL=dir===1?x.low<=sl:x.high>=sl,hitTP=dir===1?x.high>=tp:x.low<=tp;if(hitSL||hitTP){exit=k;if(hitSL&&hitTP){price=sl;reason='SL (ambos niveles en misma vela; criterio conservador)'}else if(hitSL){price=sl;reason='Stop Loss'}else{price=tp;reason='Take Profit'}break}price=x.close}
+    const pnl=(price-entry)*dir-cost;
+    trades.push({id:trades.length+1,dir,signal:i,entryIndex:entryBar,exitIndex:exit,entry,sl,tp,exit:price,pnl,reason,time:bars[entryBar].time,exitTime:bars[exit].time});
+    i=exit+1;added++;
+   }else i++;
+   scanned+=Math.max(1,i-signalIndex);
+  }
+  if(runId!==backtestRunId)return;
+  $('run').textContent='Analizando… '+trades.length+' / 500';
+  $('status').textContent='Backtesting progresivo: '+trades.length+' operaciones encontradas · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. Se añadirán automáticamente los siguientes bloques de 50.';
+  $('tradeCounter').textContent=trades.length+' / '+maxTrades;
+  renderTrades();stats();
+  if(firstPaint&&trades.length){firstPaint=false;focusTrade(0)}else if(trades.length)draw();
+  if(i>=bars.length-2||trades.length>=maxTrades){finish(true);return}
+  setTimeout(processChunk,30);
+ }
+ processChunk();
 }
 function stats(){let n=trades.length,w=trades.filter(t=>t.pnl>0).length,g=trades.filter(t=>t.pnl>0).reduce((a,t)=>a+t.pnl,0),l=-trades.filter(t=>t.pnl<0).reduce((a,t)=>a+t.pnl,0),net=g-l,eq=0,peak=0,dd=0;trades.forEach(t=>{eq+=t.pnl;peak=Math.max(peak,eq);dd=Math.max(dd,peak-eq)});$('ntrades').textContent=n;$('winrate').textContent=n?(w/n*100).toFixed(1)+'%':'—';$('net').textContent=n?net.toFixed(2):'—';$('net').className=net>=0?'pos':'neg';$('pf').textContent=l?(g/l).toFixed(2):(g?'∞':'—');$('dd').textContent=n?dd.toFixed(2):'—'}
 function renderTrades(){let tb=$('trades');$('tradeCounter').textContent=trades.length?(selected+1)+' / '+trades.length:'0 / 0';$('prevTrade').disabled=trades.length===0;$('nextTrade').disabled=trades.length===0;if(!trades.length){tb.innerHTML='<tr><td colspan="8" class="empty">No se detectaron operaciones con estos parámetros.</td></tr>';return}tb.innerHTML=trades.map((t,i)=>`<tr data-i="${i}" class="${i===selected?'active':''}"><td>${t.id} · ${t.dir===1?'COMPRA':'VENTA'}</td><td>${String(t.time)}</td><td>${t.entry.toFixed(2)}</td><td class="neg">${t.sl.toFixed(2)}</td><td class="pos">${t.tp.toFixed(2)}</td><td>${t.exit.toFixed(2)}</td><td class="${t.pnl>=0?'pos':'neg'}">${t.pnl.toFixed(2)}</td><td>${t.reason}</td></tr>`).join('');tb.querySelectorAll('tr[data-i]').forEach(row=>row.onclick=()=>focusTrade(+row.dataset.i))}
@@ -125,13 +150,13 @@ function draw(){
  ctx.fillStyle='#8095ad';ctx.font='10px system-ui';ctx.textAlign='center';let ticks=Math.min(6,arr.length);for(let k=0;k<ticks;k++){let j=Math.floor(k*(arr.length-1)/Math.max(1,ticks-1)),s=String(arr[j].time);ctx.fillText(s.slice(0,16),x(start+j),H-7)}
  $('range').textContent=`Velas ${start+1}–${end} de ${bars.length} · ${visibleTrades.length} operaciones visibles de ${trades.length}`;
 }
-$('csv').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{bars=parseCSV(await f.text());if(bars.length<30)throw Error('Se necesitan al menos 30 velas.');viewStart=0;visible=bars.length;trades=[];synthetic=false;$('run').disabled=false;$('status').textContent=`CSV completo cargado: ${bars.length.toLocaleString()} velas · ${bars[0]?.time} a ${bars[bars.length-1]?.time} · ${f.name}`;$('chartname').textContent='XAUUSD · '+f.name;$('chartmeta').textContent=`Historial completo: ${bars.length.toLocaleString()} velas. Ejecuta el backtesting para marcar todas las entradas y salidas.`;stats();renderTrades();draw()}catch(err){$('status').textContent='Error: '+err.message}});
+$('csv').addEventListener('change',async e=>{backtestRunId++;$('run').disabled=false;$('run').textContent='Ejecutar backtesting';let f=e.target.files[0];if(!f)return;try{bars=parseCSV(await f.text());if(bars.length<30)throw Error('Se necesitan al menos 30 velas.');viewStart=0;visible=bars.length;trades=[];synthetic=false;$('run').disabled=false;$('status').textContent=`CSV completo cargado: ${bars.length.toLocaleString()} velas · ${bars[0]?.time} a ${bars[bars.length-1]?.time} · ${f.name}`;$('chartname').textContent='XAUUSD · '+f.name;$('chartmeta').textContent=`Historial completo: ${bars.length.toLocaleString()} velas. Ejecuta el backtesting para marcar todas las entradas y salidas.`;stats();renderTrades();draw()}catch(err){$('status').textContent='Error: '+err.message}});
 function stepTrade(delta){if(!trades.length)return;let next=selected<0?0:(selected+delta+trades.length)%trades.length;focusTrade(next)}
 $('prevTrade').onclick=()=>stepTrade(-1);$('nextTrade').onclick=()=>stepTrade(1);
 window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')stepTrade(-1);if(e.key==='ArrowRight')stepTrade(1)});
 $('run').onclick=()=>{if(bars.length)backtest()};
 $('demo').onclick=()=>{bars=[];let p=2350,seed=24681357;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};const total=23544,signalEvery=50;for(let i=0;i<total;i++){let o=p,delta=(rnd()-.5)*1.2,c=o+delta,h=Math.max(o,c)+.12+rnd()*.45,l=Math.min(o,c)-.12-rnd()*.45,v=10;const signal=i>=70&&i<total-2&&i%signalEvery===20;if(signal){c=o+(Math.floor(i/signalEvery)%2===0?.02:-.02);h=Math.max(o,c)+.10;l=Math.min(o,c)-.10;v=100}else if(i>=71&&i<total-1&&i%signalEvery===21){c=o+(rnd()-.5)*.4;h=Math.max(o,c)+4;l=Math.min(o,c)-4;v=10}bars.push({time:new Date(Date.UTC(2025,10,23)+i*900000).toISOString().slice(0,16).replace('T',' '),open:o,high:h,low:l,close:c,volume:v});p=c}viewStart=0;visible=bars.length;synthetic=true;$('run').disabled=false;$('status').textContent='Ejemplo sintético completo: 23.544 velas M15. Diseñado para demostrar el buscador y una muestra amplia de operaciones; no son cotizaciones reales.';$('chartname').textContent='XAUUSD · EJEMPLO SINTÉTICO COMPLETO';$('chartmeta').textContent='23.544 velas demostrativas · ejecuta el backtest para analizar la divergencia automática.';backtest()};
-$('clear').onclick=()=>{bars=[];trades=[];selected=-1;$('csv').value='';$('run').disabled=true;$('status').textContent='Esperando un CSV.';$('chartname').textContent='XAUUSD · Esperando datos';$('chartmeta').textContent='Importa un CSV para visualizar el histórico';stats();renderTrades();draw()};
+$('clear').onclick=()=>{backtestRunId++;$('run').textContent='Ejecutar backtesting';bars=[];trades=[];selected=-1;$('csv').value='';$('run').disabled=true;$('status').textContent='Esperando un CSV.';$('chartname').textContent='XAUUSD · Esperando datos';$('chartmeta').textContent='Importa un CSV para visualizar el histórico';stats();renderTrades();draw()};
 $('zoomIn').onclick=()=>{visible=Math.max(20,Math.floor(visible*.75));draw()};$('zoomOut').onclick=()=>{visible=Math.min(bars.length,Math.ceil(visible*1.35));draw()};$('all').onclick=()=>{visible=bars.length;viewStart=0;draw();$('chartmeta').textContent=`Vista completa · ${bars.length.toLocaleString()} velas · ${trades.length} operaciones detectadas.`};
 function searchTrade(){const n=Number($('tradeSearch').value);if(!Number.isInteger(n)||n<1){$('searchStatus').textContent='Escribe un número de operación válido, por ejemplo 300.';return}if(n>trades.length){$('searchStatus').textContent=`Solo hay ${trades.length} operaciones en este backtest. Prueba un número entre 1 y ${trades.length}.`;return}focusTrade(n-1)}$('searchTrade').onclick=searchTrade;$('tradeSearch').addEventListener('keydown',e=>{if(e.key==='Enter')searchTrade()});
 canvas.addEventListener('wheel',e=>{if(!bars.length)return;e.preventDefault();let old=visible;visible=Math.max(20,Math.min(bars.length,Math.round(visible*(e.deltaY>0?1.18:.84))));let rect=canvas.getBoundingClientRect(),ratio=(e.clientX-rect.left)/rect.width;viewStart=Math.max(0,Math.min(bars.length-visible,viewStart+Math.round((old-visible)*ratio)));draw()},{passive:false});

@@ -54,7 +54,7 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
   <div class="stat"><span>Operaciones</span><strong id="ntrades">—</strong></div><div class="stat"><span>Win rate</span><strong id="winrate">—</strong></div><div class="stat"><span>Resultado neto</span><strong id="net">—</strong></div><div class="stat"><span>Profit factor</span><strong id="pf">—</strong></div><div class="stat"><span>Drawdown máx.</span><strong id="dd">—</strong></div>
  </div>
  <div class="panel chartpanel">
-  <div class="charttop"><div><div class="charttitle" id="chartname">XAUUSD · Esperando datos</div><div class="sub" id="chartmeta">Importa un CSV para visualizar el histórico</div></div><div class="legend"><span><i class="dot" style="background:#19b889"></i>Alcista</span><span><i class="dot" style="background:#ef5967"></i>Bajista</span><span><i class="dot" style="background:#56a6ff"></i>Entrada</span><span><i class="dot" style="background:#ef5967"></i>SL / riesgo</span><span><i class="dot" style="background:#19b889"></i>TP / beneficio</span><span><i class="dot" style="background:#788da8"></i>Volumen</span></div></div>
+  <div class="charttop"><div><div class="charttitle" id="chartname">XAUUSD · Esperando datos</div><div class="sub" id="chartmeta">Importa un CSV para visualizar el histórico</div></div><div class="btnrow"><button class="btn" id="prevTrade" disabled>← Entrada anterior</button><span class="tag" id="tradeCounter">0 / 0</span><button class="btn" id="nextTrade" disabled>Entrada siguiente →</button></div><div class="legend"><span><i class="dot" style="background:#19b889"></i>Alcista</span><span><i class="dot" style="background:#ef5967"></i>Bajista</span><span><i class="dot" style="background:#56a6ff"></i>Entrada</span><span><i class="dot" style="background:#ef5967"></i>SL / riesgo</span><span><i class="dot" style="background:#19b889"></i>TP / beneficio</span><span><i class="dot" style="background:#788da8"></i>Volumen</span></div></div>
   <canvas id="chart"></canvas>
   <div class="chartfoot"><span id="range">Sin datos cargados</span><span>Las zonas SL/TP se dibujan hasta la salida real simulada</span></div>
  </div>
@@ -82,9 +82,14 @@ function backtest(){
  let i=win+an;
  while(i<bars.length-2){
   const b=bars[i],range=Math.max(1e-12,b.high-b.low),body=Math.abs(b.close-b.open);
-  const prior=bars.slice(i-win,i),large=prior.filter(x=>Math.abs(x.close-x.open)>body);
-  const avgVol=large.length?Math.max(...large.map(x=>x.volume)):Infinity;
-  if(body/range<=small&&large.length&&b.volume>=avgVol*vmin&&b.close!==b.open){
+  const prior=bars.slice(i-win,i),priorBodies=prior.map(x=>Math.abs(x.close-x.open));
+  const avgBody=priorBodies.reduce((a,v)=>a+v,0)/Math.max(1,priorBodies.length);
+  const large=prior.filter(x=>Math.abs(x.close-x.open)>body);
+  const volRefs=large.map(x=>x.volume).filter(v=>Number.isFinite(v)&&v>0).sort((a,b)=>a-b);
+  const medianVol=volRefs.length?volRefs[Math.floor((volRefs.length-1)/2)]:0;
+  const isSmall=body/range<=small || (avgBody>0 && body<=avgBody*.5);
+  const hasVolume=medianVol>0 ? b.volume>=medianVol*vmin : b.volume>0;
+  if(isSmall&&large.length&&hasVolume&&b.close!==b.open){
    let dir=b.close>b.open?1:-1,entryBar=i+1,entry=bars[entryBar].open+(dir*cost/2),risk=Math.max(atrAt(i,an)*ap,range*.25),sl=entry-dir*risk,tp=entry+dir*risk*rr,exit=entryBar,price=bars[entryBar].close,reason='Fin de datos';
    for(let k=entryBar;k<bars.length;k++){let x=bars[k],hitSL=dir===1?x.low<=sl:x.high>=sl,hitTP=dir===1?x.high>=tp:x.low<=tp;if(hitSL||hitTP){exit=k;if(hitSL&&hitTP){price=sl;reason='SL (ambos niveles en misma vela; criterio conservador)'}else if(hitSL){price=sl;reason='Stop Loss'}else{price=tp;reason='Take Profit'}break}price=x.close}
    let pnl=(price-entry)*dir-cost;
@@ -92,11 +97,11 @@ function backtest(){
    i=exit+1;
   }else i++;
  }
- selected=trades.length?0:-1;renderTrades();stats();draw();
+ selected=trades.length?0:-1;renderTrades();stats();if(trades.length)focusTrade(0);else{$('chartmeta').textContent='No se detectaron señales: prueba aumentar ventana o reducir el umbral de volumen/cuerpo.';draw()}
 }
 function stats(){let n=trades.length,w=trades.filter(t=>t.pnl>0).length,g=trades.filter(t=>t.pnl>0).reduce((a,t)=>a+t.pnl,0),l=-trades.filter(t=>t.pnl<0).reduce((a,t)=>a+t.pnl,0),net=g-l,eq=0,peak=0,dd=0;trades.forEach(t=>{eq+=t.pnl;peak=Math.max(peak,eq);dd=Math.max(dd,peak-eq)});$('ntrades').textContent=n;$('winrate').textContent=n?(w/n*100).toFixed(1)+'%':'—';$('net').textContent=n?net.toFixed(2):'—';$('net').className=net>=0?'pos':'neg';$('pf').textContent=l?(g/l).toFixed(2):(g?'∞':'—');$('dd').textContent=n?dd.toFixed(2):'—'}
-function renderTrades(){let tb=$('trades');if(!trades.length){tb.innerHTML='<tr><td colspan="8" class="empty">No se detectaron operaciones con estos parámetros.</td></tr>';return}tb.innerHTML=trades.map((t,i)=>`<tr data-i="${i}" class="${i===selected?'active':''}"><td>${t.id} · ${t.dir===1?'COMPRA':'VENTA'}</td><td>${String(t.time)}</td><td>${t.entry.toFixed(2)}</td><td class="neg">${t.sl.toFixed(2)}</td><td class="pos">${t.tp.toFixed(2)}</td><td>${t.exit.toFixed(2)}</td><td class="${t.pnl>=0?'pos':'neg'}">${t.pnl.toFixed(2)}</td><td>${t.reason}</td></tr>`).join('');tb.querySelectorAll('tr[data-i]').forEach(row=>row.onclick=()=>focusTrade(+row.dataset.i))}
-function focusTrade(i){selected=i;let t=trades[i];visible=Math.min(120,Math.max(35,visible));viewStart=Math.max(0,Math.min(bars.length-visible,t.entryIndex-Math.floor(visible*.35)));renderTrades();draw()}
+function renderTrades(){let tb=$('trades');$('tradeCounter').textContent=trades.length?(selected+1)+' / '+trades.length:'0 / 0';$('prevTrade').disabled=trades.length===0;$('nextTrade').disabled=trades.length===0;if(!trades.length){tb.innerHTML='<tr><td colspan="8" class="empty">No se detectaron operaciones con estos parámetros.</td></tr>';return}tb.innerHTML=trades.map((t,i)=>`<tr data-i="${i}" class="${i===selected?'active':''}"><td>${t.id} · ${t.dir===1?'COMPRA':'VENTA'}</td><td>${String(t.time)}</td><td>${t.entry.toFixed(2)}</td><td class="neg">${t.sl.toFixed(2)}</td><td class="pos">${t.tp.toFixed(2)}</td><td>${t.exit.toFixed(2)}</td><td class="${t.pnl>=0?'pos':'neg'}">${t.pnl.toFixed(2)}</td><td>${t.reason}</td></tr>`).join('');tb.querySelectorAll('tr[data-i]').forEach(row=>row.onclick=()=>focusTrade(+row.dataset.i))}
+function focusTrade(i){selected=i;let t=trades[i];$('chartmeta').textContent=`Operación ${i+1}/${trades.length} · ${t.dir===1?'COMPRA':'VENTA'} · Entrada ${t.entry.toFixed(2)} · SL ${t.sl.toFixed(2)} · TP ${t.tp.toFixed(2)} · ${t.reason}`;visible=Math.min(120,Math.max(35,visible));viewStart=Math.max(0,Math.min(bars.length-visible,t.entryIndex-Math.floor(visible*.35)));renderTrades();draw()}
 function resize(){let r=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
 function draw(){
  let W=canvas.clientWidth,H=canvas.clientHeight;ctx.clearRect(0,0,W,H);ctx.fillStyle='#0b1422';ctx.fillRect(0,0,W,H);
@@ -119,6 +124,9 @@ function draw(){
  $('range').textContent=`Velas ${start+1}–${end} de ${bars.length} · ${visibleTrades.length} operaciones visibles de ${trades.length}`;
 }
 $('csv').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{bars=parseCSV(await f.text());if(bars.length<30)throw Error('Se necesitan al menos 30 velas.');viewStart=Math.max(0,bars.length-150);visible=Math.min(150,bars.length);trades=[];synthetic=false;$('run').disabled=false;$('status').textContent=`CSV cargado: ${bars.length.toLocaleString()} velas · ${f.name}`;$('chartname').textContent='XAUUSD · '+f.name;$('chartmeta').textContent='Datos importados · ejecuta el backtesting para marcar operaciones';stats();renderTrades();draw()}catch(err){$('status').textContent='Error: '+err.message}});
+function stepTrade(delta){if(!trades.length)return;let next=selected<0?0:(selected+delta+trades.length)%trades.length;focusTrade(next)}
+$('prevTrade').onclick=()=>stepTrade(-1);$('nextTrade').onclick=()=>stepTrade(1);
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')stepTrade(-1);if(e.key==='ArrowRight')stepTrade(1)});
 $('run').onclick=()=>{if(bars.length)backtest()};
 $('demo').onclick=()=>{bars=[];let p=2350;for(let i=0;i<600;i++){let drift=Math.sin(i/30)*.8+(Math.random()-.48)*2.5,o=p,c=o+(Math.random()-.48)*5,h=Math.max(o,c)+Math.random()*2,l=Math.min(o,c)-Math.random()*2,v=100+Math.random()*500;if(i%23===0)v*=3;bars.push({time:new Date(Date.UTC(2024,0,1)+i*3600000).toISOString().slice(0,16).replace('T',' '),open:o,high:h,low:l,close:c,volume:v});p=c}viewStart=bars.length-150;visible=150;synthetic=true;$('run').disabled=false;$('status').textContent='Datos sintéticos de demostración cargados. No son cotizaciones reales de XAUUSD.';$('chartname').textContent='XAUUSD · DATOS SINTÉTICOS';$('chartmeta').textContent='Solo demostración visual · no usar como resultado de trading';backtest()};
 $('clear').onclick=()=>{bars=[];trades=[];selected=-1;$('csv').value='';$('run').disabled=true;$('status').textContent='Esperando un CSV.';$('chartname').textContent='XAUUSD · Esperando datos';$('chartmeta').textContent='Importa un CSV para visualizar el histórico';stats();renderTrades();draw()};

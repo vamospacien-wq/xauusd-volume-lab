@@ -1,0 +1,30 @@
+name: Build isolated test preview
+on:
+  push:
+    branches:
+      - feature/contextual-volume-backtesting
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout test branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/contextual-volume-backtesting
+      - name: Package static test site
+        run: |
+          mkdir -p preview
+          cp index.html volume-pattern-engine.js wyckoff-range-engine.js preview/
+          test -s preview/index.html
+          test -s preview/volume-pattern-engine.js
+          test -s preview/wyckoff-range-engine.js
+      - name: Upload isolated preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: xauusd-wyckoff-test-preview
+          path: preview/
+          if-no-files-found: error
+          retention-days: 14

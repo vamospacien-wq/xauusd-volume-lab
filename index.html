@@ -60,6 +60,7 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
  </div>
  <div class="panel"><h2>Operaciones del backtesting · selecciona una fila para inspeccionarla</h2><div class="tablewrap"><table><thead><tr><th># / Tipo</th><th>Entrada</th><th>Precio</th><th>Stop Loss</th><th>Take Profit</th><th>Salida</th><th>Resultado</th><th>Cierre</th></tr></thead><tbody id="trades"><tr><td colspan="8" class="empty">Todavía no hay operaciones. Importa datos y ejecuta el backtesting.</td></tr></tbody></table></div></div>
 </section></main>
+<script src="./volume-pattern-engine.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);let bars=[],trades=[],viewStart=0,visible=200,selected=-1,synthetic=false;

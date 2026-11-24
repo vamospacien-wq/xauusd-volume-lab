@@ -42,8 +42,8 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
  <section class="panel"><h2>3 · Gestión de riesgo</h2>
   <div class="grid2"><div class="field"><label>Stop (ATR ×)</label><input id="atr" type="number" min=".2" max="10" step=".1" value="1"></div><div class="field"><label>Take Profit (R:R)</label><input id="rr" type="number" min=".2" max="10" step=".1" value="2"></div></div>
   <div class="grid2"><div class="field"><label>ATR periodo</label><input id="atrn" type="number" min="2" max="100" value="20"></div><div class="field"><label>Spread / coste</label><input id="cost" type="number" min="0" step=".01" value="0"></div></div>
-  <div class="grid2"><div class="field"><label>Mover stop a break even en</label><select id="beTrigger"><option value="2" selected>+2R (1:2)</option><option value="3">+3R (1:3)</option></select></div><div class="field"><label>Lookback soporte/resistencia</label><input id="srLookback" type="number" min="12" max="120" value="48"></div></div>
-  <div class="hint">Break even: al alcanzar el umbral elegido, el stop pasa al precio de entrada desde la vela siguiente (criterio conservador si el orden intravela no se conoce). En rangos, se exige nivel con varios contactos, falso rompimiento y después divergencia.</div>
+  <div class="field"><label>Mover stop a break even en</label><select id="beTrigger"><option value="2" selected>+2R (1:2)</option><option value="3">+3R (1:3)</option></select></div>
+  <div class="hint">Break even: al alcanzar el umbral elegido, el stop pasa al precio de entrada desde la vela siguiente (criterio conservador si el orden intravela no se conoce).</div>
   <div class="btnrow"><button class="btn primary" id="run" disabled>Ejecutar backtesting</button></div>
  </section>
  <section class="panel"><h2>Controles del gráfico</h2>
@@ -79,43 +79,11 @@ function parseCSV(text){
  return out.sort((a,b)=>String(a.time).localeCompare(String(b.time)));
 }
 function atrAt(i,n){let sum=0,c=0;for(let k=Math.max(1,i-n+1);k<=i;k++){let b=bars[k],p=bars[k-1],tr=Math.max(b.high-b.low,Math.abs(b.high-p.close),Math.abs(b.low-p.close));sum+=tr;c++}return c?sum/c:(bars[i].high-bars[i].low)}
-function findRangeSweep(i,lookback,atrPeriod){
- const start=Math.max(2,i-lookback),end=i-1,atr=atrAt(i,atrPeriod),tol=Math.max(atr*.12,1e-9);
- const prior=bars.slice(start,end+1);if(prior.length<10)return null;
- const netMove=Math.abs(prior[prior.length-1].close-prior[0].open);
- const width=Math.max(...prior.map(x=>x.high))-Math.min(...prior.map(x=>x.low));
- // Solo se clasifica como rango si el desplazamiento neto es pequeño frente al ATR
- // y el ancho no representa una expansión direccional desproporcionada.
- if(netMove>atr*1.5||width>atr*10)return null;
- const candidates=[];
- for(let k=start+1;k<end;k++){
-  const p=bars[k],prev=bars[k-1],next=bars[k+1];
-  if(p.high>=prev.high&&p.high>=next.high)candidates.push({side:'resistance',level:p.high});
-  if(p.low<=prev.low&&p.low<=next.low)candidates.push({side:'support',level:p.low});
- }
- function evaluate(side,level){
-  const touches=prior.filter(x=>side==='resistance'?Math.abs(x.high-level)<=tol:Math.abs(x.low-level)<=tol).length;
-  if(touches<2)return null;
-  let sweepIndex=-1;
-  for(let k=Math.max(start,i-4);k<i;k++){
-   const x=bars[k];
-   const swept=side==='resistance'?(x.high>level+tol&&x.close<level):(x.low<level-tol&&x.close>level);
-   if(swept)sweepIndex=k;
-  }
-  return sweepIndex>=0?{side,level,touches,sweepIndex}:null;
- }
- let best=null;
- for(const c of candidates){
-  const found=evaluate(c.side,c.level);
-  if(found&&(!best||found.touches>best.touches))best=found;
- }
- return best;
-}
 let backtestRunId=0;
 function backtest(){
  const win=Number($('divBars').value),rangeSmallPct=Number($('rangeSmall').value)/100,volComparablePct=Number($('volComparable').value)/100,minMatches=Number($('minMatches').value);
- const ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value,beR=+$('beTrigger').value,srLookback=+$('srLookback').value;
- if(![3,5,7].includes(win)||!Number.isFinite(rangeSmallPct)||rangeSmallPct<.1||rangeSmallPct>.9||!Number.isFinite(volComparablePct)||volComparablePct<.1||volComparablePct>1.5||!Number.isInteger(minMatches)||minMatches<1||minMatches>win||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0||![2,3].includes(beR)||!Number.isInteger(srLookback)||srLookback<12||srLookback>120){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
+ const ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value,beR=+$('beTrigger').value;
+ if(![3,5,7].includes(win)||!Number.isFinite(rangeSmallPct)||rangeSmallPct<.1||rangeSmallPct>.9||!Number.isFinite(volComparablePct)||volComparablePct<.1||volComparablePct>1.5||!Number.isInteger(minMatches)||minMatches<1||minMatches>win||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0||![2,3].includes(beR)){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
  const runId=++backtestRunId,chunkTrades=50,maxTrades=500,chunkBars=900;
  trades=[];selected=-1;let i=win+an,firstPaint=true;
  $('run').disabled=true;$('run').textContent='Analizando… 0 / 500';
@@ -125,8 +93,8 @@ function backtest(){
   if(runId!==backtestRunId)return;
   $('run').disabled=false;$('run').textContent='Ejecutar backtesting';
   if(done&&trades.length){if(firstPaint)focusTrade(0);else{renderTrades();stats();draw()}}
-  if(!trades.length){$('chartmeta').textContent='No se detectaron configuraciones válidas: en rangos se exige barrida falsa de soporte/resistencia y divergencia posterior; en tendencia se conserva la dirección marcada.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.'}
-  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Divergencia comparada individualmente con '+win+' velas; rangos: múltiples contactos + falso rompimiento S/R + divergencia posterior. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Límite de 500 operaciones mostradas.':' Historial completo examinado.');
+  if(!trades.length){$('chartmeta').textContent='No se detectaron configuraciones válidas con los parámetros actuales de divergencia y tendencia.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.'}
+  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Divergencia comparada individualmente con '+win+' velas; dirección según tendencia marcada o color de la vela divergente. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Límite de 500 operaciones mostradas.':' Historial completo examinado.');
  }
  function processChunk(){
   if(runId!==backtestRunId)return;
@@ -151,11 +119,7 @@ function backtest(){
     const trendMarked=Math.abs(trendMove)>=trendAtr*0.5;
     const trendDir=trendMove>0?1:trendMove<0?-1:0;
     const candleDir=b.close>b.open?1:-1;
-    // En tendencia marcada se conserva la dirección de la tendencia.
-    // En rango solo se acepta divergencia posterior a barrida falsa de S/R
-    // con al menos dos contactos previos del nivel.
-    const rangeSetup=trendMarked?null:findRangeSweep(i,srLookback,an);
-    if(!trendMarked&&!rangeSetup){i++;scanned++;continue}
+    // En tendencia marcada se conserva su dirección; fuera de tendencia se sigue el color de la vela divergente.
     const dir=trendMarked&&trendDir!==0?trendDir:candleDir;
     const entryBar=i+1,entry=bars[entryBar].open+(dir*cost/2),risk=Math.max(atrAt(i,an)*ap,range*.25),initialSL=entry-dir*risk,tp=entry+dir*risk*rr;
     let activeSL=initialSL,beArmed=false,beTriggered=false,exit=entryBar,price=bars[entryBar].close,reason='Fin de datos';
@@ -178,7 +142,7 @@ function backtest(){
      price=x.close;
     }
     const pnl=(price-entry)*dir-cost;
-    trades.push({id:trades.length+1,dir,signal:i,entryIndex:entryBar,exitIndex:exit,entry,sl:activeSL,initialSL,tp,exit:price,pnl,reason,time:bars[entryBar].time,exitTime:bars[exit].time,setup:trendMarked?'TENDENCIA':(rangeSetup.side==='support'?'FALSO QUIEBRE SOPORTE':'FALSO QUIEBRE RESISTENCIA'),level:rangeSetup?.level??null,touches:rangeSetup?.touches??0,beTriggered,beR});
+    trades.push({id:trades.length+1,dir,signal:i,entryIndex:entryBar,exitIndex:exit,entry,sl:activeSL,initialSL,tp,exit:price,pnl,reason,time:bars[entryBar].time,exitTime:bars[exit].time,setup:trendMarked?'TENDENCIA':'DIVERGENCIA',beTriggered,beR});
     i=exit+1;added++;
    }else i++;
    scanned+=Math.max(1,i-signalIndex);

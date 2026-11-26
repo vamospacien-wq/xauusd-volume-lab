@@ -460,6 +460,8 @@ for(const [id,action] of [['replayToggle','toggle'],['replayStart','start'],['re
  btn.addEventListener('click',e=>{if(Date.now()-replayTouchActionAt<800){e.preventDefault();return}},{capture:true});
 }
 
+window.addEventListener('pageshow',()=>{refreshSavedDatasets(activeDatasetId||'').catch(err=>{$('sessionStatus').textContent='No se pudo actualizar el historial: '+err.message})});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshSavedDatasets(activeDatasetId||'').catch(()=>{})});
 window.addEventListener('resize',resize);resize();stats();restoreSession();loadLiveChart();
 })();
 </script></body></html>

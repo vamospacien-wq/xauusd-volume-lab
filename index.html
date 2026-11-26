@@ -116,6 +116,23 @@ body.replay-active #replayToggle:before{content:"● ";font-size:9px}
 .livepanel.replay-mounted .live-replay-dock{display:flex}
 .livepanel.replay-mounted #liveReplayMount .chartpanel{border:0;border-radius:0;overflow:visible}
 #liveReplayMount .chartpanel .replay-controls{position:absolute}
+
+/* Replay flotante bajo demanda (estilo GoCharting): botón abajo-izquierda + ventana movible */
+#replayToolbar{display:none!important}
+#replayToolbar.open{display:flex!important;width:auto!important;max-width:calc(100% - 16px)!important;padding:5px 6px!important;gap:4px!important;opacity:.95;flex-wrap:nowrap!important;bottom:auto}
+#replayToolbar .btn{min-height:32px!important;padding:4px 8px!important}
+#replayToolbar #replayToggle,#replayToolbar #replayReset{display:none!important}
+#replayToolbar .replay-step,#replayToolbar #replayRange,#replayToolbar #replayLabel{display:none!important}#replayToolbar .replay-speed{min-width:78px!important;flex:0 0 78px!important}.chartfoot{padding-left:96px!important}
+#replayToolbar .replay-date{position:relative;overflow:hidden}
+#replayToolbar .replay-date input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.replay-launch{position:absolute;left:10px;bottom:36px;z-index:70;background:#111c2eE6;color:#e8eef7;border:1px solid #38516e;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 10px #0006}
+.replay-launch.on{background:#2877e8;border-color:#2877e8;color:#fff}
+.livepanel{position:relative}.livewrap{position:relative}
+.livewrap .replay-launch{bottom:12px}
+.livepanel.replay-mounted .livewrap .replay-launch{display:none}
+.livepanel.expanded .livewrap{position:static}
+.livepanel.expanded .livewrap .replay-launch{position:fixed;bottom:max(12px,env(safe-area-inset-bottom));z-index:10000}
+.chartpanel.expanded .replay-launch{position:fixed;bottom:max(12px,env(safe-area-inset-bottom));z-index:10000}
 </style></head>
 <body>
 <header><div class="brand"><div class="logo">VL</div><div><h1>XAUUSD · Volume Lab</h1><div class="sub">Terminal de mercado · gráfico en vivo + replay y backtesting histórico</div></div></div><div class="tag">TERMINAL · LIVE / REPLAY</div></header>
@@ -130,7 +147,7 @@ body.replay-active #replayToggle:before{content:"● ";font-size:9px}
   <button class="btn primary" id="loadLive" type="button" aria-label="Buscar y abrir instrumento">⌕ Buscar</button>
   <button class="btn" id="openProvider" type="button">Abrir GoCharting ↗</button><button class="btn expand-btn" id="expandLive" type="button" aria-pressed="false">⛶ Pantalla completa</button>
  </div>
- <div id="tvChartContainer" class="liveframe" aria-label="Gráfico de mercado de TradingView"><div id="tvChartStatus" class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>Preparando gráfico de mercado</h2><p>El gráfico gratuito de TradingView se cargará aquí. Si no aparece, puedes abrir la terminal externa.</p></div></div>
+ <div class="livewrap"><div id="tvChartContainer" class="liveframe" aria-label="Gráfico de mercado de TradingView"><div id="tvChartStatus" class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>Preparando gráfico de mercado</h2><p>El gráfico gratuito de TradingView se cargará aquí. Si no aparece, puedes abrir la terminal externa.</p></div></div><button class="replay-launch" id="liveReplayLaunch" type="button" aria-label="Abrir controles de Replay">◷ Replay</button></div>
  <div class="live-replay-dock"><div><strong>Replay dentro del gráfico</strong><span>Abre tus velas CSV en este mismo espacio, con volumen visible, reproducción, avance por vela y control de velocidad. Para repetir el histórico de un mercado en vivo, primero carga sus datos CSV.</span></div><button class="btn primary" id="liveReplayCsv" type="button">▶ Replay en este gráfico</button><button class="btn" id="returnLiveChart" type="button" hidden>↶ Volver a mercado en vivo</button><button class="btn" id="liveReplayGo" type="button">Replay nativo GoCharting ↗</button></div><div id="liveReplayMount"></div><div class="livefoot">Gráfico de TradingView integrado mediante su widget gratuito. La disponibilidad de símbolos, indicadores y datos en tiempo real depende de TradingView y de su proveedor. El Replay y el backtesting CSV funcionan de forma independiente.</div>
 </section>
 <main id="replayMain" hidden>
@@ -167,8 +184,8 @@ body.replay-active #replayToggle:before{content:"● ";font-size:9px}
  <div class="panel chartpanel">
   <div class="charttop"><div><div class="charttitle" id="chartname">XAUUSD · Esperando datos</div><div class="sub" id="chartmeta">Importa un CSV para visualizar el histórico</div></div><div class="btnrow"><button class="btn" id="prevTrade" disabled>← Entrada anterior</button><span class="tag" id="tradeCounter">0 / 0</span><button class="btn" id="nextTrade" disabled>Entrada siguiente →</button><button class="btn expand-btn" id="expandReplay" type="button" aria-pressed="false">⛶ Ampliar gráfico</button></div><div class="position-tools" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn" id="longPositionTool" type="button">＋ Posición larga</button><button class="btn" id="shortPositionTool" type="button">－ Posición corta</button><button class="btn" id="clearPositionTools" type="button">Borrar posiciones</button><span id="positionToolStatus" class="hint">Selecciona larga o corta y toca el gráfico para colocar la entrada.</span></div><div class="legend"><span><i class="dot" style="background:#19b889"></i>Alcista</span><span><i class="dot" style="background:#ef5967"></i>Bajista</span><span><i class="dot" style="background:#56a6ff"></i>Entrada</span><span><i class="dot" style="background:#ef5967"></i>SL / riesgo</span><span><i class="dot" style="background:#19b889"></i>TP / beneficio</span><span><i class="dot" style="background:#788da8"></i>Volumen</span></div></div>
   <div id="replayNotice">REPLAY ACTIVO · El gráfico solo muestra velas hasta el punto seleccionado. Las estadísticas y la tabla del backtest se ocultan durante la reproducción para no mezclar los resultados calculados con el futuro.</div>
-  <canvas id="chart"></canvas>
-  <div class="replay-controls" id="replayToolbar"><button class="btn replay-grip" type="button" aria-label="Barra de Replay">⠿</button><button class="btn" id="replayReset" type="button" disabled title="Volver al punto inicial">▣</button><button class="btn" id="replayToggle" type="button">▷ Repetir</button><button class="btn primary" id="replayPlay" type="button" disabled>▶</button><div class="replay-speed"><input id="replayRate" type="range" min="1" max="10" step="1" value="5" aria-label="Segundos por barra"><span id="replayRateLabel">1 s/barra</span></div><button class="btn" id="replayNext" type="button" disabled title="Avanzar varias velas">≫</button><button class="btn" id="replayClose" type="button" title="Cerrar Replay">×</button><button class="btn replay-step" id="replayStart" type="button" disabled title="Volver al inicio">↶</button><button class="btn replay-step" id="replayBack" type="button" disabled title="Vela anterior">‹</button><label class="replay-label" id="replayLabel">Replay inactivo</label><input id="replayRange" type="range" min="0" max="0" value="0" disabled aria-label="Posición de la vela en Replay"><select id="replaySpeed" aria-label="Velocidad de reproducción" hidden><option value="1000">1×</option><option value="500" selected>2×</option><option value="200">5×</option><option value="80">12×</option></select></div>
+  <canvas id="chart"></canvas><button class="replay-launch" id="replayLaunch" type="button" aria-label="Abrir controles de Replay">◷ Replay</button>
+  <div class="replay-controls" id="replayToolbar"><button class="btn replay-grip" type="button" aria-label="Mover barra de Replay">⠿</button><button class="btn replay-date" type="button" title="Ir a una fecha">📅<input id="replayDate" type="date" aria-label="Elegir fecha de inicio del Replay"></button><button class="btn" id="replayReset" type="button" disabled title="Volver al punto inicial">▣</button><button class="btn" id="replayToggle" type="button">▷ Repetir</button><button class="btn primary" id="replayPlay" type="button" disabled>▶</button><div class="replay-speed"><input id="replayRate" type="range" min="1" max="10" step="1" value="5" aria-label="Segundos por barra"><span id="replayRateLabel">1 s/barra</span></div><button class="btn" id="replayNext" type="button" disabled title="Avanzar varias velas">≫</button><button class="btn" id="replayClose" type="button" title="Cerrar Replay">×</button><button class="btn replay-step" id="replayStart" type="button" disabled title="Volver al inicio">↶</button><button class="btn replay-step" id="replayBack" type="button" disabled title="Vela anterior">‹</button><label class="replay-label" id="replayLabel">Replay inactivo</label><input id="replayRange" type="range" min="0" max="0" value="0" disabled aria-label="Posición de la vela en Replay"><select id="replaySpeed" aria-label="Velocidad de reproducción" hidden><option value="1000">1×</option><option value="500" selected>2×</option><option value="200">5×</option><option value="80">12×</option></select></div>
   <div class="chartfoot"><span id="range">Sin datos cargados</span><span>Las zonas SL/TP se dibujan hasta la salida real simulada</span></div>
  </div>
  <div class="panel"><h2>Operaciones del backtesting · selecciona una fila para inspeccionarla</h2><div class="tablewrap"><table><thead><tr><th># / Tipo</th><th>Entrada</th><th>Precio</th><th>Stop Loss</th><th>Take Profit</th><th>Salida</th><th>Resultado</th><th>Cierre</th></tr></thead><tbody id="trades"><tr><td colspan="8" class="empty">Todavía no hay operaciones. Importa datos y ejecuta el backtesting.</td></tr></tbody></table></div></div>
@@ -452,7 +469,7 @@ function updateReplayControls(){
  for(const id of ['replayStart','replayBack','replayPlay','replayNext','replayReset'])$(id).disabled=!hasData; $('replayClose').disabled=!hasData;
  $('replayToggle').disabled=!hasData;$('replayToggle').textContent=replayOn?'Salir del replay':'Activar replay';
  $('replayLabel').textContent=hasData?(replayOn?'Vela '+(replayIndex+1)+' / '+bars.length:'Histórico: '+bars.length+' velas'):'Carga un CSV primero';
- $('replayPlay').textContent=replayTimer!==null?'❚❚ Pausar':'▶ Reproducir';
+ $('replayPlay').textContent=replayTimer!==null?'❚❚':'▶';
 }
 function stopReplayPlayback(){if(replayTimer!==null){clearInterval(replayTimer);replayTimer=null}updateReplayControls()}
 function setReplayIndex(n){
@@ -486,7 +503,7 @@ function replayAction(action){
 }
 function replayRateMs(){const v=Number($('replayRate')?.value||5);return Math.max(100,Math.round(1100-v*100))}
 function resetReplay(){if(!bars.length)return;stopReplayPlayback();if(!replayOn)activateReplay();if(!replayOn)return;setReplayIndex(Number.isInteger(replayStartIndex)?replayStartIndex:0);$('status').textContent='Replay reiniciado desde la vela inicial.'}
-$('replayReset').onclick=resetReplay;$('replayClose').title='Cerrar controles de Replay';$('replayClose').onclick=()=>{stopReplayPlayback();if(replayOn)activateReplay();else{replayPreviewIndex=null;document.body.classList.remove('replay-active');updateReplayControls();draw();scheduleSave()}};
+$('replayReset').onclick=resetReplay;$('replayClose').title='Cerrar controles de Replay';$('replayClose').onclick=()=>{closeReplayDock();stopReplayPlayback();if(replayOn)activateReplay();else{replayPreviewIndex=null;document.body.classList.remove('replay-active');updateReplayControls();draw();scheduleSave()}};
 $('replayReset').style.touchAction='manipulation';$('replayClose').style.touchAction='manipulation';$('replayRate').addEventListener('input',()=>{$('replayRateLabel').textContent=(replayRateMs()/1000).toFixed(1).replace('.0','')+' s/barra';if(replayTimer!==null){stopReplayPlayback();replayAction('play')}});$('replayRateLabel').textContent=(replayRateMs()/1000).toFixed(1).replace('.0','')+' s/barra';
 $('replayToggle').onclick=()=>replayAction('toggle');
 $('replayStart').onclick=()=>replayAction('start');
@@ -499,6 +516,17 @@ $('replaySpeed').addEventListener('change',()=>{if(replayTimer!==null){stopRepla
 // Route touch pointer-up directly to the same action and suppress its duplicate click.
 for(const [id,action] of [['replayToggle','toggle'],['replayStart','start'],['replayBack','back'],['replayNext','next'],['replayPlay','play']]){const btn=$(id);btn.style.touchAction='manipulation';btn.onclick=()=>{if(!btn.disabled)replayAction(action)}}
 
+
+function parseBarTime(t){if(typeof t==='number')return t>1e12?t:t*1000;const v=Date.parse(String(t).trim().replace(' ','T'));return v}
+function placeReplayDock(){const tb=$('replayToolbar'),parent=tb.offsetParent||tb.parentElement;if(!parent)return;const b=parent.getBoundingClientRect(),cv=$('chart'),w=tb.offsetWidth,h=tb.offsetHeight;let left=NaN,top=NaN;try{const sp=JSON.parse(localStorage.getItem('xvl-replay-dock-position')||'null');if(sp){left=parseFloat(sp.left);top=parseFloat(sp.top)}}catch(_){}if(isNaN(left)||isNaN(top)){left=(b.width-w)/2;top=(cv?cv.offsetTop:0)+10}
+ tb.style.left=Math.max(4,Math.min(b.width-w-4,left))+'px';tb.style.top=Math.max(4,Math.min(b.height-h-4,top))+'px';tb.style.bottom='auto';tb.style.transform='none'}
+function openReplayDock(){if(!bars.length){setTerminalMode('replay');$('status').textContent='Carga un CSV (o abre uno del historial) para usar el Replay.';document.getElementById('csvDropZone')?.scrollIntoView({behavior:'smooth',block:'center'});return}
+ $('replayToolbar').classList.add('open');$('replayLaunch').classList.add('on');requestAnimationFrame(placeReplayDock);if(!replayOn)activateReplay()}
+function closeReplayDock(){$('replayToolbar').classList.remove('open');$('replayLaunch').classList.remove('on')}
+$('replayLaunch').onclick=()=>{$('replayToolbar').classList.contains('open')?closeReplayDock():openReplayDock()};
+$('liveReplayLaunch').onclick=()=>{if(!bars.length){$('liveReplayCsv').click();return}$('liveReplayCsv').click();openReplayDock()};
+$('replayDate').addEventListener('change',e=>{if(!bars.length||!e.target.value)return;const target=Date.parse(e.target.value+'T00:00:00');let idx=bars.findIndex(b=>parseBarTime(b.time)>=target);if(idx<0){const last=parseBarTime(bars[bars.length-1].time);if(isNaN(last)){$('status').textContent='No se pudo interpretar la fecha de las velas.';return}idx=bars.length-1}
+ stopReplayPlayback();if(!replayOn)activateReplay();replayStartIndex=idx;setReplayIndex(idx);viewStart=Math.max(0,Math.min(idx-Math.floor(visible*.65),Math.max(0,bars.length-visible)));draw();$('status').textContent='Replay iniciado en '+String(bars[idx].time)});
 
 const replayToolbar=$('replayToolbar'),replayGrip=replayToolbar?.querySelector('.replay-grip');
 if(replayToolbar&&replayGrip){
@@ -520,5 +548,4 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('resize',resize);resize();stats();restoreSession();loadLiveChart();
 })();
 
-if(!$('livePanel').hidden)initTradingView();
 </script></body></html>

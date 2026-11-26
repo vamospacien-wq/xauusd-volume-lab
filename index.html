@@ -183,7 +183,6 @@ function backtest(){
   while(i<bars.length-2&&trades.length<maxTrades&&added<chunkTrades&&scanned<chunkBars){
    const signalIndex=i,b=bars[i],range=Math.max(1e-12,b.high-b.low);
    const prior=bars.slice(i-win,i);
-   const priorRanges=prior.map(x=>Math.max(1e-12,x.high-x.low));
    // La candidata debe ser estrictamente la vela de menor rango de la ventana anterior.
    const isSmallest=priorRanges.every(r=>range<r);
    // Solo comparar contra velas cuyo rango sea claramente mayor que el de la candidata.

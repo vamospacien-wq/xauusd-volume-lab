@@ -166,21 +166,26 @@ function backtest(){
  const ap=+$('atr').value,rr=+$('rr').value,an=+$('atrn').value,cost=+$('cost').value,beR=+$('beTrigger').value;
  if(!Number.isInteger(win)||win<2||win>500||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0||![2,3].includes(beR)){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
  const runId=++backtestRunId,chunkTrades=50,maxTrades=700,chunkBars=900;
- trades=[];selected=-1;let i=Math.max(win,an),firstPaint=true;
+ trades=[];let candidates=[];selected=-1;let i=Math.max(win,an),firstPaint=true;
  $('run').disabled=true;$('run').textContent='Analizando… 0 / '+maxTrades;
  $('status').textContent='Preparando el análisis progresivo del historial completo…';
  $('tradeCounter').textContent='0 / 700';stats();renderTrades();
  function finish(done){
   if(runId!==backtestRunId)return;
+  if(done){
+   if(candidates.length<=maxTrades)trades=candidates;
+   else{const picked=[];for(let n=0;n<maxTrades;n++){const at=Math.round(n*(candidates.length-1)/(maxTrades-1));picked.push(candidates[at])}trades=picked}
+   trades=trades.map((t,n)=>({...t,id:n+1}));
+  }
   $('run').disabled=false;$('run').textContent='Ejecutar backtesting';
-  if(done&&trades.length){if(firstPaint)focusTrade(0);else{renderTrades();stats();draw()}}
+  if(done&&trades.length){firstPaint=false;focusTrade(0)}
   if(!trades.length){$('chartmeta').textContent='No se detectaron configuraciones válidas con los parámetros actuales de divergencia y tendencia.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.';scheduleSave()}
-  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Se comparó el rango completo de la candidata con velas anteriores de mayor rango; el volumen debe ser comparable (al menos el 80% del volumen de una referencia mayor); dirección según color/excepción de tendencia. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Meta de '+maxTrades+' operaciones alcanzada.':' Historial completo examinado; no se forzaron señales adicionales.');scheduleSave();
+  else $('status').textContent='Análisis terminado: se examinaron '+bars.length.toLocaleString()+' velas y se encontraron '+candidates.length.toLocaleString()+' operaciones candidatas. Se muestran '+trades.length+' operaciones distribuidas a lo largo del histórico, en orden cronológico. '+(candidates.length>maxTrades?'Se eligieron uniformemente entre las candidatas para cubrir todo el periodo. ':'Se muestran todas las candidatas válidas. ')+'No se inventaron señales. Divergencia por rango completo y volumen comparable; break even en +'+beR+'R.';scheduleSave();
  }
  function processChunk(){
   if(runId!==backtestRunId)return;
   let added=0,scanned=0;
-  while(i<bars.length-2&&trades.length<maxTrades&&added<chunkTrades&&scanned<chunkBars){
+  while(i<bars.length-2&&added<chunkTrades&&scanned<chunkBars){
    const signalIndex=i,b=bars[i],range=Math.max(1e-12,b.high-b.low);
    const prior=bars.slice(i-win,i);
    // Se usa el rango completo high-low, incluidas las mechas.
@@ -221,18 +226,17 @@ function backtest(){
      price=x.close;
     }
     const pnl=(price-entry)*dir-cost;
-    trades.push({id:trades.length+1,dir,signal:i,entryIndex:entryBar,exitIndex:exit,entry,sl:activeSL,initialSL,tp,exit:price,pnl,reason,time:bars[entryBar].time,exitTime:bars[exit].time,setup:trendMarked?'TENDENCIA':'DIVERGENCIA',beTriggered,beR});
+    candidates.push({id:candidates.length+1,dir,signal:i,entryIndex:entryBar,exitIndex:exit,entry,sl:activeSL,initialSL,tp,exit:price,pnl,reason,time:bars[entryBar].time,exitTime:bars[exit].time,setup:trendMarked?'TENDENCIA':'DIVERGENCIA',beTriggered,beR});
     i=exit+1;added++;
    }else i++;
    scanned+=Math.max(1,i-signalIndex);
   }
   if(runId!==backtestRunId)return;
-  $('run').textContent='Analizando… '+trades.length+' / '+maxTrades;
-  $('status').textContent='Backtesting progresivo: '+trades.length+' / '+maxTrades+' operaciones objetivo · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. El gráfico se actualiza por bloques de hasta 50; no se inventan señales si no existen.';
-  $('tradeCounter').textContent=trades.length+' / '+maxTrades;
-  renderTrades();stats();
-  if(firstPaint&&trades.length){firstPaint=false;focusTrade(0)}else if(trades.length)draw();
-  if(i>=bars.length-2||trades.length>=maxTrades){finish(true);return}
+  $('run').textContent='Analizando… '+candidates.length+' señales';
+  $('status').textContent='Recorriendo histórico completo: '+candidates.length.toLocaleString()+' operaciones candidatas · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. Al terminar se seleccionarán hasta 700 operaciones distribuidas cronológicamente.';
+  $('tradeCounter').textContent=candidates.length.toLocaleString()+' candidatas';
+  $('chartmeta').textContent='Analizando todo el CSV; todavía no se ha seleccionado la muestra final de operaciones.';
+  if(i>=bars.length-2){finish(true);return}
   setTimeout(processChunk,30);
  }
  processChunk();

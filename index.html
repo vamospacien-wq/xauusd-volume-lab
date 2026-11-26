@@ -48,7 +48,7 @@ body.replay-active .sidebar{opacity:.8}
 
 /* Expandable chart workspace */
 .livepanel.expanded{position:fixed;inset:0;z-index:9999;margin:0;padding:0;border:0;border-radius:0;display:block;overflow:hidden;background:var(--bg);width:100vw;height:100vh;height:100dvh}
-.livepanel.expanded .livehead{position:absolute;top:env(safe-area-inset-top,0);left:0;right:0;z-index:10000;display:flex;gap:6px;padding:8px;background:rgba(10,20,34,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.livepanel.expanded .livehead{position:fixed;top:env(safe-area-inset-top,0);right:0;left:auto;z-index:10000;display:block;padding:7px;background:transparent;border:0;pointer-events:none}.livepanel.expanded .livehead>*:not(#expandLive){display:none!important}.livepanel.expanded #expandLive{pointer-events:auto;box-shadow:0 2px 12px #0008;background:#111c2e;border-color:#38516e}
 .livepanel.expanded .liveframe{position:absolute;inset:0;width:100%;height:100%;min-height:0;border:0}
 .livepanel.expanded .livefoot{display:none}
 .chartpanel.expanded{position:fixed;inset:0;z-index:9999;margin:0;border-radius:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
@@ -60,11 +60,8 @@ body.replay-active .sidebar{opacity:.8}
 body.chart-expanded,body.live-expanded{overflow:hidden}
 .expand-btn{white-space:nowrap}
 @media(max-width:580px){
- .livepanel.expanded .livehead{gap:5px;padding:calc(6px + env(safe-area-inset-top,0)) 6px 6px;max-height:30vh;overflow:auto}
- .livepanel.expanded .livehead label{display:none}
- .livepanel.expanded .livehead input{min-width:0;width:min(54vw,260px);flex:1}
- .livepanel.expanded .livehead select{min-width:70px;width:auto}
- .livepanel.expanded .livehead .btn{padding:8px 9px;font-size:12px}
+ .livepanel.expanded .livehead{top:env(safe-area-inset-top,0);right:0;padding:5px}
+ .livepanel.expanded #expandLive{padding:7px 8px;font-size:11px}
  .chartpanel.expanded .charttop{gap:5px;padding:6px}
  .chartpanel.expanded .charttitle{font-size:12px}
  .chartpanel.expanded .charttop .sub{display:none}

@@ -87,13 +87,12 @@ body.chart-expanded,body.live-expanded{overflow:hidden}
 </nav>
 <section class="livepanel" id="livePanel">
  <div class="livehead">
-  <label for="liveSymbol" class="hint">Instrumento</label><input id="liveSymbol" list="symbolSuggestions" value="PEPPERSTONEUK:XAUUSD" aria-label="Buscar instrumento (ej. OANDA:EURUSD)" placeholder="Buscar símbolo: EURUSD, XAUUSD…"><datalist id="symbolSuggestions"><option value="PEPPERSTONEUK:XAUUSD"><option value="OANDA:XAUUSD"><option value="OANDA:EURUSD"><option value="FX:EURUSD"><option value="OANDA:GBPUSD"><option value="FX:GBPUSD"><option value="NASDAQ:AAPL"><option value="NASDAQ:TSLA"><option value="NASDAQ:NVDA"><option value="NASDAQ:MSFT"><option value="NASDAQ:AMZN"><option value="NASDAQ:GOOGL"><option value="NYSE:TSLA"><option value="BINANCE:BTCUSDT"><option value="BINANCE:ETHUSDT"></datalist>
-  <label for="liveInterval" class="hint">Temporalidad</label><select id="liveInterval"><option value="1">1m</option><option value="3">3m</option><option value="5">5m</option><option value="15" selected>15m</option><option value="30">30m</option><option value="60">1H</option><option value="120">2H</option><option value="240">4H</option><option value="D">1D</option><option value="W">1W</option><option value="M">1M</option></select>
-  <button class="btn primary" id="loadLive" type="button">Abrir gráfico</button>
-  <button class="btn" id="openProvider" type="button">Abrir proveedor ↗</button><button class="btn expand-btn" id="expandLive" type="button" aria-pressed="false">⛶ Ampliar gráfico</button>
+  <label for="liveSymbol" class="hint">Instrumento</label><input id="liveSymbol" list="symbolSuggestions" value="PEPPERSTONEUK:XAUUSD" aria-label="Buscar instrumento en GoCharting" placeholder="Buscar símbolo: XAUUSD, EURUSD…"><datalist id="symbolSuggestions"><option value="PEPPERSTONEUK:XAUUSD"><option value="OANDA:XAUUSD"><option value="OANDA:EURUSD"><option value="FX:EURUSD"><option value="OANDA:GBPUSD"><option value="FX:GBPUSD"><option value="NASDAQ:AAPL"><option value="NASDAQ:TSLA"><option value="NASDAQ:NVDA"><option value="NASDAQ:MSFT"><option value="NASDAQ:AMZN"><option value="NASDAQ:GOOGL"><option value="BINANCE:BTCUSDT"><option value="BINANCE:ETHUSDT"></datalist>
+  <button class="btn primary" id="loadLive" type="button" aria-label="Buscar y abrir instrumento">⌕ Buscar</button>
+  <button class="btn" id="openProvider" type="button">Abrir GoCharting ↗</button><button class="btn expand-btn" id="expandLive" type="button" aria-pressed="false">⛶ Pantalla completa</button>
  </div>
- <iframe id="liveChart" class="liveframe" title="Gráfico de mercado en vivo" loading="lazy" allowfullscreen></iframe>
- <div class="livefoot">Este panel carga un gráfico externo de TradingView con búsqueda de símbolos y herramientas disponibles en su widget. La cotización, el retraso, los instrumentos y las funciones dependen de la cobertura y condiciones del proveedor. No ejecuta órdenes ni sustituye una conexión de broker. El replay y el backtesting con tus propios CSV se realizan en la pestaña independiente.</div>
+ <iframe id="liveChart" class="liveframe" title="Terminal GoCharting con gráfico de mercado" loading="eager" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
+ <div class="livefoot">Terminal GoCharting cargada directamente. Usa el buscador y el selector de temporalidad nativos dentro de GoCharting para que el símbolo y el intervalo se apliquen al gráfico. Si el proveedor impide la carga dentro de esta página, pulsa «Abrir GoCharting» para usar la terminal oficial completa. Los datos en tiempo real dependen del símbolo y de los permisos del proveedor.</div>
 </section>
 <main id="replayMain" hidden>
 <aside class="sidebar">
@@ -279,7 +278,7 @@ function setExpandedChart(mode){
   const turnOn=!live.classList.contains('expanded');
   live.classList.toggle('expanded',turnOn);chart.classList.remove('expanded');
   document.body.classList.toggle('live-expanded',turnOn);document.body.classList.remove('chart-expanded');
-  $('expandLive').textContent=turnOn?'⤢ Restaurar tamaño':'⛶ Ampliar gráfico';$('expandLive').setAttribute('aria-pressed',String(turnOn));
+  $('expandLive').textContent=turnOn?'⤢ Restaurar tamaño':'⛶ Pantalla completa';$('expandLive').setAttribute('aria-pressed',String(turnOn));
   $('expandReplay').textContent='⛶ Ampliar gráfico';$('expandReplay').setAttribute('aria-pressed','false');
   expandedChart=turnOn?'live':null;
  }else{
@@ -287,7 +286,7 @@ function setExpandedChart(mode){
   chart.classList.toggle('expanded',turnOn);live.classList.remove('expanded');
   document.body.classList.toggle('chart-expanded',turnOn);document.body.classList.remove('live-expanded');
   $('expandReplay').textContent=turnOn?'⤢ Restaurar tamaño':'⛶ Ampliar gráfico';$('expandReplay').setAttribute('aria-pressed',String(turnOn));
-  $('expandLive').textContent='⛶ Ampliar gráfico';$('expandLive').setAttribute('aria-pressed','false');
+  $('expandLive').textContent='⛶ Pantalla completa';$('expandLive').setAttribute('aria-pressed','false');
   expandedChart=turnOn?'replay':null;
  }
  if(mode==='replay')resize();
@@ -299,16 +298,10 @@ function closeExpandedChart(){if(!expandedChart)return;const mode=expandedChart;
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeExpandedChart()});
 
 function normalizedSymbol(){let sym=($('liveSymbol').value||'PEPPERSTONEUK:XAUUSD').trim().toUpperCase().replace(/\s+/g,'');if(!sym)return 'PEPPERSTONEUK:XAUUSD';return sym}
-function liveChartUrl(){
- const symbol=normalizedSymbol();
- const interval=$('liveInterval').value||'15';
- // TradingView's widgetembed uses these parameter names (without underscores).
- const q=new URLSearchParams({symbol,interval,timezone:'Etc/UTC',theme:'dark',style:'1',locale:'es',toolbarbg:'0b1422',symboledit:'1',saveimage:'1',hidesidetoolbar:'0',hide_top_toolbar:'0',withdateranges:'1',details:'1',hotlist:'0',calendar:'0',studies:'Volume@tv-basicstudies',utm_source:'vamospacien-wq.github.io',utm_medium:'widget',utm_campaign:'chart'});
- return 'https://www.tradingview.com/widgetembed/?'+q.toString();
-}
-function loadLiveChart(){const sym=normalizedSymbol();$('liveSymbol').value=sym;$('liveChart').src=liveChartUrl();$('openProvider').onclick=()=>window.open('https://www.tradingview.com/chart/?symbol='+encodeURIComponent(sym),'_blank','noopener');$('liveChart').setAttribute('title','Gráfico de '+sym+' · '+$('liveInterval').selectedOptions[0].textContent);}
+function goChartingUrl(){return 'https://gocharting.com/terminal?ticker='+encodeURIComponent(normalizedSymbol())}
+function loadLiveChart(){const sym=normalizedSymbol();$('liveSymbol').value=sym;const url=goChartingUrl();$('liveChart').src=url;$('openProvider').onclick=()=>window.open(url,'_blank','noopener');$('liveChart').setAttribute('title','Terminal GoCharting · '+sym)}
 function setTerminalMode(mode){const live=mode==='live';$('tabLive').classList.toggle('active',live);$('tabReplay').classList.toggle('active',!live);$('livePanel').hidden=!live;$('replayMain').hidden=live;if(!live){if(bars.length){updateReplayControls()}requestAnimationFrame(()=>{resize();if(bars.length)draw()})}if(live&& !$('liveChart').src)loadLiveChart()}
-$('tabLive').onclick=()=>setTerminalMode('live');$('tabReplay').onclick=()=>setTerminalMode('replay');$('loadLive').onclick=loadLiveChart;$('liveSymbol').addEventListener('keydown',e=>{if(e.key==='Enter')loadLiveChart()});$('liveSymbol').addEventListener('change',loadLiveChart);$('liveInterval').addEventListener('change',loadLiveChart);$('liveChart').addEventListener('load',()=>{$('liveChart').dataset.loaded='true'});
+$('tabLive').onclick=()=>setTerminalMode('live');$('tabReplay').onclick=()=>setTerminalMode('replay');$('loadLive').onclick=loadLiveChart;$('liveSymbol').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadLiveChart()}});$('liveSymbol').addEventListener('change',loadLiveChart);$('liveChart').addEventListener('load',()=>{$('liveChart').dataset.loaded='true'});
 function updateReplayControls(){
  const range=$('replayRange');range.max=String(Math.max(0,bars.length-1));range.value=String(Math.max(0,Math.min(replayIndex,bars.length-1)));range.disabled=!bars.length;
  for(const id of ['replayStart','replayBack','replayPlay','replayNext'])$(id).disabled=!bars.length;

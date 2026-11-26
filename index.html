@@ -74,6 +74,7 @@ body.chart-expanded,body.live-expanded{overflow:hidden}
  .chartpanel.expanded #replayNotice{font-size:10px;padding:5px}
 }
 
+.gocharting-fallback{min-height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px 20px;background:radial-gradient(ellipse at center,#172b43 0%,#0b1422 68%);gap:12px}.gocharting-fallback h2{margin:0;font-size:20px}.gocharting-fallback p{max-width:540px;line-height:1.6;color:#a9bdd4;margin:0}.fallback-mark{display:grid;place-items:center;width:58px;height:58px;border-radius:14px;background:#f3f5f7;color:#182536;font-weight:900;font-size:18px;letter-spacing:-1px}.gocharting-fallback .btn{padding:12px 18px}@media(max-width:580px){.gocharting-fallback{min-height:60vh;padding:20px 14px}.gocharting-fallback h2{font-size:17px}}
 </style></head>
 <body>
 <header><div class="brand"><div class="logo">VL</div><div><h1>XAUUSD · Volume Lab</h1><div class="sub">Terminal de mercado · gráfico en vivo + replay y backtesting histórico</div></div></div><div class="tag">TERMINAL · LIVE / REPLAY</div></header>
@@ -88,8 +89,8 @@ body.chart-expanded,body.live-expanded{overflow:hidden}
   <button class="btn primary" id="loadLive" type="button" aria-label="Buscar y abrir instrumento">⌕ Buscar</button>
   <button class="btn" id="openProvider" type="button">Abrir GoCharting ↗</button><button class="btn expand-btn" id="expandLive" type="button" aria-pressed="false">⛶ Pantalla completa</button>
  </div>
- <iframe id="liveChart" class="liveframe" title="Terminal GoCharting con gráfico de mercado" loading="eager" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
- <div class="livefoot">Terminal GoCharting cargada directamente. Usa el buscador y el selector de temporalidad nativos dentro de GoCharting para que el símbolo y el intervalo se apliquen al gráfico. Si el proveedor impide la carga dentro de esta página, pulsa «Abrir GoCharting» para usar la terminal oficial completa. Los datos en tiempo real dependen del símbolo y de los permisos del proveedor.</div>
+ <div id="goChartingFallback" class="gocharting-fallback"><div class="fallback-mark">GC</div><h2>Terminal oficial de GoCharting</h2><p>GoCharting no está permitiendo mostrar su terminal dentro de este panel. Abre la terminal oficial para usar el gráfico en vivo, las herramientas, los instrumentos y las temporalidades nativas.</p><button class="btn primary" id="openGoChartingMain" type="button">Abrir terminal GoCharting ↗</button><p class="hint">El replay y el backtesting con archivos CSV siguen disponibles en la pestaña correspondiente de esta página.</p></div>
+ <div class="livefoot">La terminal oficial se abre directamente para evitar una pantalla en blanco cuando el proveedor bloquea la carga incrustada. El modo Replay y backtesting local permanece dentro de XAUUSD Volume Lab.</div>
 </section>
 <main id="replayMain" hidden>
 <aside class="sidebar">
@@ -296,7 +297,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape')closeExpandedChart()})
 
 function normalizedSymbol(){let sym=($('liveSymbol').value||'PEPPERSTONEUK:XAUUSD').trim().toUpperCase().replace(/\s+/g,'');if(!sym)return 'PEPPERSTONEUK:XAUUSD';return sym}
 function goChartingUrl(){return 'https://gocharting.com/terminal?ticker='+encodeURIComponent(normalizedSymbol())}
-function loadLiveChart(){const sym=normalizedSymbol();$('liveSymbol').value=sym;const url=goChartingUrl();$('liveChart').src=url;$('openProvider').onclick=()=>window.open(url,'_blank','noopener');$('liveChart').setAttribute('title','Terminal GoCharting · '+sym)}
+function loadLiveChart(){const sym=normalizedSymbol();$('liveSymbol').value=sym;const url=goChartingUrl();$('openProvider').onclick=()=>window.open(url,'_blank','noopener');$('openGoChartingMain').onclick=()=>window.open(url,'_blank','noopener');$('liveChart')?.setAttribute('title','GoCharting '+sym)}
 function setTerminalMode(mode){const live=mode==='live';$('tabLive').classList.toggle('active',live);$('tabReplay').classList.toggle('active',!live);$('livePanel').hidden=!live;$('replayMain').hidden=live;if(!live){if(bars.length){updateReplayControls()}requestAnimationFrame(()=>{resize();if(bars.length)draw()})}if(live&& !$('liveChart').src)loadLiveChart()}
 $('tabLive').onclick=()=>setTerminalMode('live');$('tabReplay').onclick=()=>setTerminalMode('replay');$('loadLive').onclick=loadLiveChart;$('liveSymbol').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadLiveChart()}});$('liveSymbol').addEventListener('change',loadLiveChart);$('liveChart').addEventListener('load',()=>{$('liveChart').dataset.loaded='true'});
 function updateReplayControls(){

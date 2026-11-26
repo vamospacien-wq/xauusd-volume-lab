@@ -47,25 +47,34 @@ body.replay-active .sidebar{opacity:.8}
 
 
 /* Expandable chart workspace */
-.livepanel.expanded{position:fixed;inset:0;z-index:9999;margin:0;border-radius:0;display:flex;flex-direction:column;overflow:auto;background:var(--bg)}
-.livepanel.expanded .livehead{position:sticky;top:0;z-index:2;flex-shrink:0}
-.livepanel.expanded .liveframe{height:calc(100dvh - 120px);min-height:0;flex:1}
-.livepanel.expanded .livefoot{flex-shrink:0}
+.livepanel.expanded{position:fixed;inset:0;z-index:9999;margin:0;padding:0;border:0;border-radius:0;display:block;overflow:hidden;background:var(--bg);width:100vw;height:100vh;height:100dvh}
+.livepanel.expanded .livehead{position:absolute;top:env(safe-area-inset-top,0);left:0;right:0;z-index:10000;display:flex;gap:6px;padding:8px;background:rgba(10,20,34,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.livepanel.expanded .liveframe{position:absolute;inset:0;width:100%;height:100%;min-height:0;border:0}
+.livepanel.expanded .livefoot{display:none}
 .chartpanel.expanded{position:fixed;inset:0;z-index:9999;margin:0;border-radius:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
 .chartpanel.expanded .charttop{flex-shrink:0;padding:8px 12px}
 .chartpanel.expanded #replayNotice{flex-shrink:0}
-.chartpanel.expanded #chart{height:calc(100dvh - 190px)!important;min-height:180px;flex:1;min-height:0}
-.chartpanel.expanded .replay-controls{flex-shrink:0}
-.chartpanel.expanded .chartfoot{flex-shrink:0}
+.chartpanel.expanded #chart{height:calc(100dvh - 180px)!important;min-height:0;flex:1;min-height:0}
+.chartpanel.expanded .replay-controls{flex-shrink:0;padding:8px;gap:6px}
+.chartpanel.expanded .chartfoot{display:none}
 body.chart-expanded,body.live-expanded{overflow:hidden}
 .expand-btn{white-space:nowrap}
 @media(max-width:580px){
- .livepanel.expanded .livehead{gap:6px;padding:8px}
- .livepanel.expanded .liveframe{height:calc(100dvh - 155px);min-height:0}
- .chartpanel.expanded .charttop{gap:6px;padding:7px}
- .chartpanel.expanded #chart{height:calc(100dvh - 245px)!important}
+ .livepanel.expanded .livehead{gap:5px;padding:calc(6px + env(safe-area-inset-top,0)) 6px 6px;max-height:30vh;overflow:auto}
+ .livepanel.expanded .livehead label{display:none}
+ .livepanel.expanded .livehead input{min-width:0;width:min(54vw,260px);flex:1}
+ .livepanel.expanded .livehead select{min-width:70px;width:auto}
+ .livepanel.expanded .livehead .btn{padding:8px 9px;font-size:12px}
+ .chartpanel.expanded .charttop{gap:5px;padding:6px}
+ .chartpanel.expanded .charttitle{font-size:12px}
+ .chartpanel.expanded .charttop .sub{display:none}
+ .chartpanel.expanded .charttop .btn{padding:7px 8px;font-size:11px}
+ .chartpanel.expanded #chart{height:calc(100dvh - 165px)!important}
  .chartpanel.expanded .legend{display:none}
- .chartpanel.expanded .chartfoot{font-size:10px;padding:6px}
+ .chartpanel.expanded .replay-controls{padding:6px;gap:5px}
+ .chartpanel.expanded .replay-controls .btn{padding:7px;font-size:11px}
+ .chartpanel.expanded .replay-label{min-width:0;font-size:10px}
+ .chartpanel.expanded #replayNotice{font-size:10px;padding:5px}
 }
 
 </style></head>
@@ -78,7 +87,7 @@ body.chart-expanded,body.live-expanded{overflow:hidden}
 </nav>
 <section class="livepanel" id="livePanel">
  <div class="livehead">
-  <label for="liveSymbol" class="hint">Instrumento</label><input id="liveSymbol" value="PEPPERSTONEUK:XAUUSD" aria-label="Símbolo de mercado" placeholder="Ej. OANDA:EURUSD">
+  <label for="liveSymbol" class="hint">Instrumento</label><input id="liveSymbol" list="symbolSuggestions" value="PEPPERSTONEUK:XAUUSD" aria-label="Buscar instrumento (ej. OANDA:EURUSD)" placeholder="Buscar símbolo: EURUSD, XAUUSD…"><datalist id="symbolSuggestions"><option value="PEPPERSTONEUK:XAUUSD"><option value="OANDA:XAUUSD"><option value="OANDA:EURUSD"><option value="FX:EURUSD"><option value="OANDA:GBPUSD"><option value="FX:GBPUSD"><option value="NASDAQ:AAPL"><option value="NASDAQ:TSLA"><option value="NASDAQ:NVDA"><option value="NASDAQ:MSFT"><option value="NASDAQ:AMZN"><option value="NASDAQ:GOOGL"><option value="NYSE:TSLA"><option value="BINANCE:BTCUSDT"><option value="BINANCE:ETHUSDT"></datalist>
   <label for="liveInterval" class="hint">Temporalidad</label><select id="liveInterval"><option value="1">1m</option><option value="3">3m</option><option value="5">5m</option><option value="15" selected>15m</option><option value="30">30m</option><option value="60">1H</option><option value="120">2H</option><option value="240">4H</option><option value="D">1D</option><option value="W">1W</option><option value="M">1M</option></select>
   <button class="btn primary" id="loadLive" type="button">Abrir gráfico</button>
   <button class="btn" id="openProvider" type="button">Abrir proveedor ↗</button><button class="btn expand-btn" id="expandLive" type="button" aria-pressed="false">⛶ Ampliar gráfico</button>
@@ -289,15 +298,17 @@ $('expandReplay').addEventListener('click',()=>setExpandedChart('replay'));
 function closeExpandedChart(){if(!expandedChart)return;const mode=expandedChart;expandedChart=null;if(mode==='live'){ $('livePanel').classList.remove('expanded');document.body.classList.remove('live-expanded');$('expandLive').textContent='⛶ Ampliar gráfico';$('expandLive').setAttribute('aria-pressed','false')}else{document.querySelector('.chartpanel').classList.remove('expanded');document.body.classList.remove('chart-expanded');$('expandReplay').textContent='⛶ Ampliar gráfico';$('expandReplay').setAttribute('aria-pressed','false');resize()}}
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeExpandedChart()});
 
+function normalizedSymbol(){let sym=($('liveSymbol').value||'PEPPERSTONEUK:XAUUSD').trim().toUpperCase().replace(/\s+/g,'');if(!sym)return 'PEPPERSTONEUK:XAUUSD';return sym}
 function liveChartUrl(){
- const symbol=($('liveSymbol').value||'PEPPERSTONEUK:XAUUSD').trim().toUpperCase();
+ const symbol=normalizedSymbol();
  const interval=$('liveInterval').value||'15';
- const q=new URLSearchParams({symbol,interval,timezone:'Etc/UTC',theme:'dark',style:'1',locale:'es',toolbar_bg:'0b1422',enable_publishing:'false',allow_symbol_change:'true',hide_side_toolbar:'0',hide_top_toolbar:'false',withdateranges:'true',details:'true',hotlist:'false',calendar:'false',studies:'Volume@tv-basicstudies'});
- return 'https://s.tradingview.com/widgetembed/?'+q.toString();
+ // TradingView's widgetembed uses these parameter names (without underscores).
+ const q=new URLSearchParams({symbol,interval,timezone:'Etc/UTC',theme:'dark',style:'1',locale:'es',toolbarbg:'0b1422',symboledit:'1',saveimage:'1',hidesidetoolbar:'0',hide_top_toolbar:'0',withdateranges:'1',details:'1',hotlist:'0',calendar:'0',studies:'Volume@tv-basicstudies',utm_source:'vamospacien-wq.github.io',utm_medium:'widget',utm_campaign:'chart'});
+ return 'https://www.tradingview.com/widgetembed/?'+q.toString();
 }
-function loadLiveChart(){const sym=($('liveSymbol').value||'PEPPERSTONEUK:XAUUSD').trim().toUpperCase();if(!sym){$('liveSymbol').value='PEPPERSTONEUK:XAUUSD';return} $('liveChart').src=liveChartUrl();$('openProvider').onclick=()=>window.open('https://www.tradingview.com/chart/?symbol='+encodeURIComponent(sym),'_blank','noopener');}
-function setTerminalMode(mode){const live=mode==='live';$('tabLive').classList.toggle('active',live);$('tabReplay').classList.toggle('active',!live);$('livePanel').hidden=!live;$('replayMain').hidden=live;if(!live&&bars.length){draw();updateReplayControls()}if(live&& !$('liveChart').src)loadLiveChart()}
-$('tabLive').onclick=()=>setTerminalMode('live');$('tabReplay').onclick=()=>setTerminalMode('replay');$('loadLive').onclick=loadLiveChart;$('liveSymbol').addEventListener('keydown',e=>{if(e.key==='Enter')loadLiveChart()});$('liveInterval').addEventListener('change',loadLiveChart);
+function loadLiveChart(){const sym=normalizedSymbol();$('liveSymbol').value=sym;$('liveChart').src=liveChartUrl();$('openProvider').onclick=()=>window.open('https://www.tradingview.com/chart/?symbol='+encodeURIComponent(sym),'_blank','noopener');$('liveChart').setAttribute('title','Gráfico de '+sym+' · '+$('liveInterval').selectedOptions[0].textContent);}
+function setTerminalMode(mode){const live=mode==='live';$('tabLive').classList.toggle('active',live);$('tabReplay').classList.toggle('active',!live);$('livePanel').hidden=!live;$('replayMain').hidden=live;if(!live){if(bars.length){updateReplayControls()}requestAnimationFrame(()=>{resize();if(bars.length)draw()})}if(live&& !$('liveChart').src)loadLiveChart()}
+$('tabLive').onclick=()=>setTerminalMode('live');$('tabReplay').onclick=()=>setTerminalMode('replay');$('loadLive').onclick=loadLiveChart;$('liveSymbol').addEventListener('keydown',e=>{if(e.key==='Enter')loadLiveChart()});$('liveSymbol').addEventListener('change',loadLiveChart);$('liveInterval').addEventListener('change',loadLiveChart);$('liveChart').addEventListener('load',()=>{$('liveChart').dataset.loaded='true'});
 function updateReplayControls(){
  const range=$('replayRange');range.max=String(Math.max(0,bars.length-1));range.value=String(Math.max(0,Math.min(replayIndex,bars.length-1)));range.disabled=!bars.length;
  for(const id of ['replayStart','replayBack','replayPlay','replayNext'])$(id).disabled=!bars.length;

@@ -149,12 +149,13 @@ async function refreshSavedDatasets(selectId=''){
   const openPromise=openSessionDB();
   db=await Promise.race([openPromise,new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(Error('No se pudo abrir el almacenamiento local. Cierra otras pestañas de la aplicación y recarga la página.')),10000)})]);
   clearTimeout(timeoutId);timeoutId=null;
-  const all=await new Promise((resolve,reject)=>{
+  let readTimeout=null;
+  const all=await Promise.race([new Promise((resolve,reject)=>{
    const tx=db.transaction(DATASET_STORE,'readonly'),store=tx.objectStore(DATASET_STORE),req=store.openCursor(),items=[];
    req.onsuccess=()=>{const cursor=req.result;if(!cursor){resolve(items);return}const d=cursor.value;items.push({id:d.id,name:d.name||'CSV guardado',savedAt:d.savedAt||'',candleCount:Number(d.candleCount||(Array.isArray(d.bars)?d.bars.length:0))});cursor.continue()};
    req.onerror=()=>reject(req.error||Error('No se pudo leer el historial de CSV'));
    tx.onabort=()=>reject(tx.error||Error('Se canceló la lectura del historial'));
-  });
+  }),new Promise((_,reject)=>{readTimeout=setTimeout(()=>reject(Error('La lectura del historial quedó bloqueada. Cierra las otras pestañas de la aplicación y vuelve a intentarlo.')),10000)})]).finally(()=>{if(readTimeout)clearTimeout(readTimeout)});
   db.close();db=null;
   all.sort((a,b)=>String(b.savedAt).localeCompare(String(a.savedAt)));
   sel.innerHTML='';

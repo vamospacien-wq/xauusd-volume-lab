@@ -407,23 +407,58 @@ function loadLiveChart(){const sym=normalizedSymbol();$('liveSymbol').value=sym;
 function setTerminalMode(mode){const live=mode==='live';$('tabLive').classList.toggle('active',live);$('tabReplay').classList.toggle('active',!live);$('livePanel').hidden=!live;$('replayMain').hidden=live;if(!live){if(bars.length){updateReplayControls()}requestAnimationFrame(()=>{resize();if(bars.length)draw()})}if(live&& !$('liveChart').src)loadLiveChart()}
 $('tabLive').onclick=()=>setTerminalMode('live');$('tabReplay').onclick=()=>setTerminalMode('replay');$('loadLive').onclick=loadLiveChart;$('liveSymbol').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadLiveChart()}});$('liveSymbol').addEventListener('change',loadLiveChart);$('liveChart').addEventListener('load',()=>{$('liveChart').dataset.loaded='true'});
 function updateReplayControls(){
- const range=$('replayRange');range.max=String(Math.max(0,bars.length-1));range.value=String(Math.max(0,Math.min(replayIndex,bars.length-1)));range.disabled=!bars.length;
- for(const id of ['replayStart','replayBack','replayPlay','replayNext'])$(id).disabled=!bars.length;
- $('replayToggle').disabled=!bars.length;$('replayToggle').textContent=replayOn?'Salir del replay':'Activar replay';
- $('replayLabel').textContent=bars.length?(replayOn?'Vela '+(replayIndex+1)+' / '+bars.length:'Histórico: '+bars.length+' velas'):'Carga un CSV primero';
- $('replayPlay').textContent=replayTimer?'❚❚ Pausar':'▶ Reproducir';
+ const hasData=Array.isArray(bars)&&bars.length>0,range=$('replayRange');
+ range.max=String(Math.max(0,bars.length-1));range.value=String(Math.max(0,Math.min(replayIndex,bars.length-1)));range.disabled=!hasData;
+ for(const id of ['replayStart','replayBack','replayPlay','replayNext'])$(id).disabled=!hasData;
+ $('replayToggle').disabled=!hasData;$('replayToggle').textContent=replayOn?'Salir del replay':'Activar replay';
+ $('replayLabel').textContent=hasData?(replayOn?'Vela '+(replayIndex+1)+' / '+bars.length:'Histórico: '+bars.length+' velas'):'Carga un CSV primero';
+ $('replayPlay').textContent=replayTimer!==null?'❚❚ Pausar':'▶ Reproducir';
 }
 function stopReplayPlayback(){if(replayTimer!==null){clearInterval(replayTimer);replayTimer=null}updateReplayControls()}
-function setReplayIndex(n){if(!bars.length)return;replayIndex=Math.max(0,Math.min(bars.length-1,Math.floor(n)));selectedCandleIndex=replayIndex;if(replayOn){visible=Math.max(20,Math.min(visible,bars.length));if(replayIndex<viewStart||replayIndex>=viewStart+visible)viewStart=Math.max(0,replayIndex-Math.floor(visible*.65));$('chartmeta').textContent='Replay · vela '+(replayIndex+1).toLocaleString()+' / '+bars.length.toLocaleString()+' · '+String(bars[replayIndex].time)}updateReplayControls();draw();scheduleSave()}
-$('replayToggle').onclick=()=>{if(!bars.length){$('status').textContent='Primero carga un CSV desde “Agregar archivo CSV” o abre uno del historial.';return}stopReplayPlayback();if(!replayOn){const chosen=Number.isInteger(replayPreviewIndex)?replayPreviewIndex:(Number.isInteger(selectedCandleIndex)?selectedCandleIndex:Math.max(0,Math.min(bars.length-1,viewStart+Math.floor(visible*.8))));replayIndex=Math.max(0,Math.min(bars.length-1,chosen));replayPreviewIndex=null;replayOn=true;visible=Math.max(20,Math.min(bars.length,visible));if(replayIndex<viewStart||replayIndex>=viewStart+visible)viewStart=Math.max(0,replayIndex-Math.floor(visible*.65));replayStartIndex=replayIndex;$('chartmeta').textContent='REPLAY ACTIVO DESDE LA VELA '+(replayIndex+1).toLocaleString()+' / '+bars.length.toLocaleString()+' · '+String(bars[replayIndex].time)+'. La vela siguiente será el primer avance.';$('status').textContent='Replay iniciado desde la vela seleccionada '+(replayIndex+1).toLocaleString()+'. Pulsa Reproducir o Vela ▶ para avanzar.'}else{replayOn=false;replayTimer=null;replayPreviewIndex=null;$('chartmeta').textContent='Replay detenido · histórico completo disponible.';$('status').textContent='Replay detenido.'}document.body.classList.toggle('replay-active',replayOn);updateReplayControls();draw();scheduleSave()};
-$('replayStart').onclick=()=>{stopReplayPlayback();if(!bars.length){$('status').textContent='Carga o abre un CSV antes de iniciar.';return}const start=Number.isInteger(replayStartIndex)?replayStartIndex:(Number.isInteger(replayPreviewIndex)?replayPreviewIndex:(Number.isInteger(selectedCandleIndex)?selectedCandleIndex:Math.max(0,Math.min(bars.length-1,viewStart+Math.floor(visible*.8)))));replayStartIndex=start;replayPreviewIndex=start;replayOn=false;$('replayToggle').click();setReplayIndex(start)};
-$('replayBack').onclick=()=>{if(!bars.length){$('status').textContent='Carga o abre un CSV antes de retroceder.';return}if(!replayOn)$('replayToggle').click();setReplayIndex(replayIndex-1)};
-$('replayNext').onclick=()=>{if(!bars.length){$('status').textContent='Carga o abre un CSV antes de avanzar.';return}if(!replayOn)$('replayToggle').click();setReplayIndex(replayIndex+1)};
-$('replayRange').addEventListener('input',e=>setReplayIndex(Number(e.target.value)));
-$('replayPlay').onclick=()=>{if(!bars.length){$('status').textContent='Carga un CSV antes de reproducir el Replay.';return}if(!replayOn){$('replayToggle').click()}if(replayTimer){stopReplayPlayback();return}if(replayIndex>=bars.length-1)setReplayIndex(0);replayTimer=setInterval(()=>{if(replayIndex>=bars.length-1){stopReplayPlayback();return}setReplayIndex(replayIndex+1)},Number($('replaySpeed').value)||500);updateReplayControls()};
-$('replaySpeed').addEventListener('change',()=>{if(replayTimer){stopReplayPlayback();$('replayPlay').click()}});
-window.addEventListener('pageshow',()=>{refreshSavedDatasets(activeDatasetId||'').catch(err=>{$('sessionStatus').textContent='No se pudo actualizar el historial: '+err.message})});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshSavedDatasets(activeDatasetId||'').catch(()=>{})});
+function setReplayIndex(n){
+ if(!bars.length){$('status').textContent='No hay velas en memoria. Abre el CSV desde el historial.';return}
+ replayIndex=Math.max(0,Math.min(bars.length-1,Math.floor(Number(n)||0)));selectedCandleIndex=replayIndex;
+ if(replayOn){visible=Math.max(20,Math.min(visible,bars.length));if(replayIndex<viewStart||replayIndex>=viewStart+visible)viewStart=Math.max(0,replayIndex-Math.floor(visible*.65));$('chartmeta').textContent='Replay · vela '+(replayIndex+1).toLocaleString()+' / '+bars.length.toLocaleString()+' · '+String(bars[replayIndex].time)}
+ updateReplayControls();draw();scheduleSave()
+}
+function activateReplay(){
+ if(!bars.length){$('status').textContent='No hay velas cargadas. Selecciona el CSV del historial o vuelve a importarlo.';return}
+ if(replayOn){stopReplayPlayback();replayOn=false;replayPreviewIndex=null;document.body.classList.remove('replay-active');$('chartmeta').textContent='Replay detenido.';$('status').textContent='Replay detenido.';updateReplayControls();draw();scheduleSave();return}
+ stopReplayPlayback();
+ const chosen=Number.isInteger(replayPreviewIndex)?replayPreviewIndex:(Number.isInteger(selectedCandleIndex)?selectedCandleIndex:Math.max(0,Math.min(bars.length-1,viewStart+Math.floor(visible*.8))));
+ replayIndex=Math.max(0,Math.min(bars.length-1,chosen));replayStartIndex=replayIndex;replayPreviewIndex=null;replayOn=true;
+ if(replayIndex<viewStart||replayIndex>=viewStart+visible)viewStart=Math.max(0,replayIndex-Math.floor(visible*.65));
+ document.body.classList.add('replay-active');$('chartmeta').textContent='REPLAY DESDE VELA '+(replayIndex+1).toLocaleString()+' / '+bars.length.toLocaleString()+' · '+String(bars[replayIndex].time);$('status').textContent='Replay activo. Avanza una vela o pulsa Reproducir.';updateReplayControls();draw();scheduleSave()
+}
+function replayAction(action){
+ if(!bars.length){$('status').textContent='No hay velas cargadas. Abre el CSV desde el historial.';return}
+ if(action==='toggle'){activateReplay();return}
+ if(action==='start'){stopReplayPlayback();if(!replayOn)activateReplay();if(replayOn)setReplayIndex(replayStartIndex??replayIndex);return}
+ if(action==='back'||action==='next'){if(!replayOn)activateReplay();if(replayOn)setReplayIndex(replayIndex+(action==='back'?-1:1));return}
+ if(action==='play'){
+  if(replayTimer!==null){stopReplayPlayback();$('status').textContent='Replay pausado.';return}
+  if(!replayOn)activateReplay();
+  if(!replayOn)return;
+  if(replayIndex>=bars.length-1)setReplayIndex(replayStartIndex??0);
+  replayTimer=setInterval(()=>{if(!replayOn||replayIndex>=bars.length-1){stopReplayPlayback();$('status').textContent='Fin del histórico disponible en Replay.';return}setReplayIndex(replayIndex+1)},Math.max(50,Number($('replaySpeed').value)||500));
+  updateReplayControls();$('status').textContent='Reproduciendo histórico…';return
+ }
+}
+$('replayToggle').onclick=()=>replayAction('toggle');
+$('replayStart').onclick=()=>replayAction('start');
+$('replayBack').onclick=()=>replayAction('back');
+$('replayNext').onclick=()=>replayAction('next');
+$('replayPlay').onclick=()=>replayAction('play');
+$('replayRange').addEventListener('input',e=>{if(!replayOn)activateReplay();setReplayIndex(Number(e.target.value))});
+$('replaySpeed').addEventListener('change',()=>{if(replayTimer!==null){stopReplayPlayback();replayAction('play')}});
+// Mobile browsers sometimes suppress synthesized click events after touch gestures.
+// Route touch pointer-up directly to the same action and suppress its duplicate click.
+let replayTouchActionAt=0;
+for(const [id,action] of [['replayToggle','toggle'],['replayStart','start'],['replayBack','back'],['replayNext','next'],['replayPlay','play']]){
+ const btn=$(id);
+ btn.addEventListener('pointerup',e=>{if(e.pointerType!=='touch'||btn.disabled)return;e.preventDefault();replayTouchActionAt=Date.now();replayAction(action)},{passive:false});
+ btn.addEventListener('click',e=>{if(Date.now()-replayTouchActionAt<800){e.preventDefault();return}},{capture:true});
+}
 
 window.addEventListener('resize',resize);resize();stats();restoreSession();loadLiveChart();
 })();

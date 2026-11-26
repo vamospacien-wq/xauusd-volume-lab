@@ -29,6 +29,7 @@ input,select,button{font:inherit}input[type=file]{width:100%;font-size:11px;colo
 .navtab{border:1px solid #30445d;background:#111e30;color:#a9bdd4;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
 .navtab.active{background:#163a46;border-color:#1aa884;color:#e8fff8}
 .navnote{color:#8da1ba;font-size:11px;margin-left:auto}
+#livePanel[hidden],#replayMain[hidden]{display:none!important}
 .livepanel{margin:14px 18px;background:#0b1422;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .livehead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px;background:#111c2e;border-bottom:1px solid var(--line)}
 .livehead input,.livehead select{background:#0b1626;color:var(--text);border:1px solid #30425b;border-radius:7px;padding:9px;min-width:100px}
@@ -256,7 +257,7 @@ function updateReplayControls(){
 }
 function stopReplayPlayback(){if(replayTimer){clearInterval(replayTimer);replayTimer=null}updateReplayControls()}
 function setReplayIndex(n){if(!bars.length)return;replayIndex=Math.max(0,Math.min(bars.length-1,Math.floor(n)));if(replayOn){const minView=Math.max(1,Math.min(visible,replayIndex+1));viewStart=Math.max(0,replayIndex+1-minView);if(viewStart+visible>replayIndex+1)viewStart=Math.max(0,replayIndex+1-visible)}updateReplayControls();draw();scheduleSave()}
-$('replayToggle').onclick=()=>{if(!bars.length)return;replayOn=!replayOn;if(replayOn&&replayIndex>=bars.length-1)replayIndex=Math.min(bars.length-1,Math.max(0,Math.floor(bars.length*.1)));if(!replayOn)stopReplayPlayback();document.body.classList.toggle('replay-active',replayOn);if(replayOn){viewStart=Math.max(0,replayIndex+1-visible);$('chartmeta').textContent='Replay histórico · avanza vela por vela o reproduce automáticamente. No se muestran velas posteriores al punto seleccionado.'}updateReplayControls();draw();scheduleSave()};
+$('replayToggle').onclick=()=>{if(!bars.length)return;replayOn=!replayOn;if(replayOn){if(replayIndex>=bars.length-1)replayIndex=Math.min(bars.length-1,Math.max(0,Math.floor(bars.length*.1)));visible=Math.min(bars.length,Math.max(50,Math.min(200,visible)));viewStart=Math.max(0,replayIndex+1-visible)}if(!replayOn)stopReplayPlayback();document.body.classList.toggle('replay-active',replayOn);if(replayOn){viewStart=Math.max(0,replayIndex+1-visible);$('chartmeta').textContent='Replay histórico · avanza vela por vela o reproduce automáticamente. No se muestran velas posteriores al punto seleccionado.'}updateReplayControls();draw();scheduleSave()};
 $('replayStart').onclick=()=>{stopReplayPlayback();setReplayIndex(0)};
 $('replayBack').onclick=()=>setReplayIndex(replayIndex-1);
 $('replayNext').onclick=()=>setReplayIndex(replayIndex+1);

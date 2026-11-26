@@ -167,7 +167,7 @@ function backtest(){
  if(!Number.isInteger(win)||win<2||win>500||!Number.isFinite(ap)||ap<=0||!Number.isFinite(rr)||rr<=0||!Number.isInteger(an)||an<2||!Number.isFinite(cost)||cost<0||![2,3].includes(beR)){$('status').textContent='Revisa los parámetros de divergencia y gestión de riesgo.';return}
  const runId=++backtestRunId,chunkTrades=50,maxTrades=Math.max(1,Math.min(700,Number($('tradeTarget').value)||700)),chunkBars=900;
  trades=[];selected=-1;let i=Math.max(win,an),firstPaint=true;
- $('run').disabled=true;$('run').textContent='Analizando… 0 / 700';
+ $('run').disabled=true;$('run').textContent='Analizando… 0 / '+maxTrades;
  $('status').textContent='Preparando el análisis progresivo del historial completo…';
  $('tradeCounter').textContent='0 / 700';stats();renderTrades();
  function finish(done){
@@ -175,7 +175,7 @@ function backtest(){
   $('run').disabled=false;$('run').textContent='Ejecutar backtesting';
   if(done&&trades.length){if(firstPaint)focusTrade(0);else{renderTrades();stats();draw()}}
   if(!trades.length){$('chartmeta').textContent='No se detectaron configuraciones válidas con los parámetros actuales de divergencia y tendencia.';draw();$('status').textContent='Análisis terminado: 0 operaciones válidas en '+bars.length.toLocaleString()+' velas.';scheduleSave()}
-  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Se exigió la vela más pequeña de cada ventana de '+win+' velas y volumen igual/superior al mayor volumen de las velas anteriores de mayor rango, sin filtro de color ni tamaño mínimo; dirección según color/excepción de tendencia. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Límite de 700 operaciones alcanzado.':' Historial completo examinado.');scheduleSave();
+  else $('status').textContent='Análisis terminado: '+trades.length+' operaciones válidas en '+bars.length.toLocaleString()+' velas. Se exigió la vela más pequeña de cada ventana de '+win+' velas y volumen igual/superior al mayor volumen de las velas anteriores de mayor rango, sin filtro de color ni tamaño mínimo; dirección según color/excepción de tendencia. Break even automático en +'+beR+'R; el stop se activa desde la vela siguiente.'+(trades.length>=maxTrades?' Meta de '+maxTrades+' operaciones alcanzada.':' Historial completo examinado; no se forzaron señales adicionales.');scheduleSave();
  }
  function processChunk(){
   if(runId!==backtestRunId)return;
@@ -230,8 +230,8 @@ function backtest(){
    scanned+=Math.max(1,i-signalIndex);
   }
   if(runId!==backtestRunId)return;
-  $('run').textContent='Analizando… '+trades.length+' / 700';
-  $('status').textContent='Backtesting progresivo: '+trades.length+' operaciones encontradas · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. Filtro: vela más pequeña de '+win+' anteriores; compara volumen solo con velas de mayor rango, sin múltiplos ni filtro de color. Se añadirán automáticamente los siguientes bloques de 50.';
+  $('run').textContent='Analizando… '+trades.length+' / '+maxTrades;
+  $('status').textContent='Backtesting progresivo: '+trades.length+' / '+maxTrades+' operaciones objetivo · '+Math.min(i,bars.length-2).toLocaleString()+' / '+bars.length.toLocaleString()+' velas examinadas. El gráfico se actualiza por bloques de hasta 50; no se inventan señales si no existen.';
   $('tradeCounter').textContent=trades.length+' / '+maxTrades;
   renderTrades();stats();
   if(firstPaint&&trades.length){firstPaint=false;focusTrade(0)}else if(trades.length)draw();

@@ -438,7 +438,7 @@ function replayAction(action){
  if(!bars.length){$('status').textContent='No hay velas cargadas. Abre el CSV desde el historial.';return}
  if(action==='toggle'){activateReplay();return}
  if(action==='start'){stopReplayPlayback();if(!replayOn)activateReplay();if(replayOn)setReplayIndex(replayStartIndex??replayIndex);return}
- if(action==='back'||action==='next'){if(!replayOn)activateReplay();if(replayOn)setReplayIndex(replayIndex+(action==='back'?-1:1));return}
+ if(action==='back'||action==='next'){if(!replayOn)activateReplay();if(replayOn)setReplayIndex(replayIndex+(action==='back'?-1:10));return}
  if(action==='play'){
   if(replayTimer!==null){stopReplayPlayback();$('status').textContent='Replay pausado.';return}
   if(!replayOn)activateReplay();
@@ -450,7 +450,8 @@ function replayAction(action){
 }
 function replayRateMs(){const v=Number($('replayRate')?.value||5);return Math.max(100,Math.round(1100-v*100))}
 function resetReplay(){if(!bars.length)return;stopReplayPlayback();if(!replayOn)activateReplay();if(!replayOn)return;setReplayIndex(Number.isInteger(replayStartIndex)?replayStartIndex:0);$('status').textContent='Replay reiniciado desde la vela inicial.'}
-$('replayReset').onclick=resetReplay;$('replayClose').onclick=()=>{stopReplayPlayback();if(replayOn)activateReplay();else{replayPreviewIndex=null;document.body.classList.remove('replay-active');updateReplayControls();draw();scheduleSave()}};$('replayRate').addEventListener('input',()=>{$('replayRateLabel').textContent=(replayRateMs()/1000).toFixed(1).replace('.0','')+' s/barra';if(replayTimer!==null){stopReplayPlayback();replayAction('play')}});$('replayRateLabel').textContent=(replayRateMs()/1000).toFixed(1).replace('.0','')+' s/barra';
+$('replayReset').onclick=resetReplay;$('replayClose').onclick=()=>{stopReplayPlayback();if(replayOn)activateReplay();else{replayPreviewIndex=null;document.body.classList.remove('replay-active');updateReplayControls();draw();scheduleSave()}};
+for(const [id,fn] of [['replayReset',resetReplay],['replayClose',()=>{stopReplayPlayback();if(replayOn)activateReplay();else{replayPreviewIndex=null;document.body.classList.remove('replay-active');updateReplayControls();draw();scheduleSave()}}]]){const b=$(id);let touchAt=0;b.addEventListener('pointerup',e=>{if(e.pointerType!=='touch'||b.disabled)return;e.preventDefault();touchAt=Date.now();fn()},{passive:false});b.addEventListener('click',e=>{if(Date.now()-touchAt<800){e.preventDefault();return}},{capture:true})}$('replayRate').addEventListener('input',()=>{$('replayRateLabel').textContent=(replayRateMs()/1000).toFixed(1).replace('.0','')+' s/barra';if(replayTimer!==null){stopReplayPlayback();replayAction('play')}});$('replayRateLabel').textContent=(replayRateMs()/1000).toFixed(1).replace('.0','')+' s/barra';
 $('replayToggle').onclick=()=>replayAction('toggle');
 $('replayStart').onclick=()=>replayAction('start');
 $('replayBack').onclick=()=>replayAction('back');

@@ -45,6 +45,29 @@ body.replay-active .stats,body.replay-active .workspace>.panel:not(.chartpanel){
 body.replay-active .sidebar{opacity:.8}
 @media(max-width:580px){.terminal-nav{padding:8px 10px}.navnote{width:100%;margin-left:0}.livepanel{margin:10px}.livehead input{width:100%;flex:1}.liveframe{min-height:430px;height:65vh}}
 
+
+/* Expandable chart workspace */
+.livepanel.expanded{position:fixed;inset:0;z-index:9999;margin:0;border-radius:0;display:flex;flex-direction:column;overflow:auto;background:var(--bg)}
+.livepanel.expanded .livehead{position:sticky;top:0;z-index:2;flex-shrink:0}
+.livepanel.expanded .liveframe{height:calc(100dvh - 120px);min-height:0;flex:1}
+.livepanel.expanded .livefoot{flex-shrink:0}
+.chartpanel.expanded{position:fixed;inset:0;z-index:9999;margin:0;border-radius:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+.chartpanel.expanded .charttop{flex-shrink:0;padding:8px 12px}
+.chartpanel.expanded #replayNotice{flex-shrink:0}
+.chartpanel.expanded #chart{height:calc(100dvh - 190px)!important;min-height:180px;flex:1;min-height:0}
+.chartpanel.expanded .replay-controls{flex-shrink:0}
+.chartpanel.expanded .chartfoot{flex-shrink:0}
+body.chart-expanded,body.live-expanded{overflow:hidden}
+.expand-btn{white-space:nowrap}
+@media(max-width:580px){
+ .livepanel.expanded .livehead{gap:6px;padding:8px}
+ .livepanel.expanded .liveframe{height:calc(100dvh - 155px);min-height:0}
+ .chartpanel.expanded .charttop{gap:6px;padding:7px}
+ .chartpanel.expanded #chart{height:calc(100dvh - 245px)!important}
+ .chartpanel.expanded .legend{display:none}
+ .chartpanel.expanded .chartfoot{font-size:10px;padding:6px}
+}
+
 </style></head>
 <body>
 <header><div class="brand"><div class="logo">VL</div><div><h1>XAUUSD · Volume Lab</h1><div class="sub">Terminal de mercado · gráfico en vivo + replay y backtesting histórico</div></div></div><div class="tag">TERMINAL · LIVE / REPLAY</div></header>
@@ -58,7 +81,7 @@ body.replay-active .sidebar{opacity:.8}
   <label for="liveSymbol" class="hint">Instrumento</label><input id="liveSymbol" value="PEPPERSTONEUK:XAUUSD" aria-label="Símbolo de mercado" placeholder="Ej. OANDA:EURUSD">
   <label for="liveInterval" class="hint">Temporalidad</label><select id="liveInterval"><option value="1">1m</option><option value="3">3m</option><option value="5">5m</option><option value="15" selected>15m</option><option value="30">30m</option><option value="60">1H</option><option value="120">2H</option><option value="240">4H</option><option value="D">1D</option><option value="W">1W</option><option value="M">1M</option></select>
   <button class="btn primary" id="loadLive" type="button">Abrir gráfico</button>
-  <button class="btn" id="openProvider" type="button">Abrir proveedor ↗</button>
+  <button class="btn" id="openProvider" type="button">Abrir proveedor ↗</button><button class="btn expand-btn" id="expandLive" type="button" aria-pressed="false">⛶ Ampliar gráfico</button>
  </div>
  <iframe id="liveChart" class="liveframe" title="Gráfico de mercado en vivo" loading="lazy" allowfullscreen></iframe>
  <div class="livefoot">Este panel carga un gráfico externo de TradingView con búsqueda de símbolos y herramientas disponibles en su widget. La cotización, el retraso, los instrumentos y las funciones dependen de la cobertura y condiciones del proveedor. No ejecuta órdenes ni sustituye una conexión de broker. El replay y el backtesting con tus propios CSV se realizan en la pestaña independiente.</div>
@@ -92,7 +115,7 @@ body.replay-active .sidebar{opacity:.8}
   <div class="stat"><span>Operaciones</span><strong id="ntrades">—</strong></div><div class="stat"><span>Win rate</span><strong id="winrate">—</strong></div><div class="stat"><span>Resultado neto</span><strong id="net">—</strong></div><div class="stat"><span>Profit factor</span><strong id="pf">—</strong></div><div class="stat"><span>Drawdown máx.</span><strong id="dd">—</strong></div>
  </div>
  <div class="panel chartpanel">
-  <div class="charttop"><div><div class="charttitle" id="chartname">XAUUSD · Esperando datos</div><div class="sub" id="chartmeta">Importa un CSV para visualizar el histórico</div></div><div class="btnrow"><button class="btn" id="prevTrade" disabled>← Entrada anterior</button><span class="tag" id="tradeCounter">0 / 0</span><button class="btn" id="nextTrade" disabled>Entrada siguiente →</button></div><div class="legend"><span><i class="dot" style="background:#19b889"></i>Alcista</span><span><i class="dot" style="background:#ef5967"></i>Bajista</span><span><i class="dot" style="background:#56a6ff"></i>Entrada</span><span><i class="dot" style="background:#ef5967"></i>SL / riesgo</span><span><i class="dot" style="background:#19b889"></i>TP / beneficio</span><span><i class="dot" style="background:#788da8"></i>Volumen</span></div></div>
+  <div class="charttop"><div><div class="charttitle" id="chartname">XAUUSD · Esperando datos</div><div class="sub" id="chartmeta">Importa un CSV para visualizar el histórico</div></div><div class="btnrow"><button class="btn" id="prevTrade" disabled>← Entrada anterior</button><span class="tag" id="tradeCounter">0 / 0</span><button class="btn" id="nextTrade" disabled>Entrada siguiente →</button><button class="btn expand-btn" id="expandReplay" type="button" aria-pressed="false">⛶ Ampliar gráfico</button></div><div class="legend"><span><i class="dot" style="background:#19b889"></i>Alcista</span><span><i class="dot" style="background:#ef5967"></i>Bajista</span><span><i class="dot" style="background:#56a6ff"></i>Entrada</span><span><i class="dot" style="background:#ef5967"></i>SL / riesgo</span><span><i class="dot" style="background:#19b889"></i>TP / beneficio</span><span><i class="dot" style="background:#788da8"></i>Volumen</span></div></div>
   <div id="replayNotice">REPLAY ACTIVO · El gráfico solo muestra velas hasta el punto seleccionado. Las estadísticas y la tabla del backtest se ocultan durante la reproducción para no mezclar los resultados calculados con el futuro.</div>
   <canvas id="chart"></canvas>
   <div class="replay-controls"><button class="btn" id="replayToggle" type="button">Activar replay</button><button class="btn" id="replayStart" type="button" disabled>⏮ Inicio</button><button class="btn" id="replayBack" type="button" disabled>◀ Vela</button><button class="btn primary" id="replayPlay" type="button" disabled>▶ Reproducir</button><button class="btn" id="replayNext" type="button" disabled>Vela ▶</button><label class="replay-label" id="replayLabel">Replay inactivo</label><input id="replayRange" type="range" min="0" max="0" value="0" disabled aria-label="Posición del replay"><select id="replaySpeed" aria-label="Velocidad de reproducción"><option value="1000">1×</option><option value="500" selected>2×</option><option value="200">5×</option><option value="80">12×</option></select></div>
@@ -238,6 +261,33 @@ $('zoomIn').onclick=()=>{visible=Math.max(20,Math.floor(visible*.75));draw();sch
 function searchTrade(){const n=Number($('tradeSearch').value);if(!Number.isInteger(n)||n<1){$('searchStatus').textContent='Escribe un número de operación válido, por ejemplo 300.';return}if(n>trades.length){$('searchStatus').textContent=`Solo hay ${trades.length} operaciones en este backtest. Prueba un número entre 1 y ${trades.length}.`;return}focusTrade(n-1)}$('searchTrade').onclick=searchTrade;$('tradeSearch').addEventListener('keydown',e=>{if(e.key==='Enter')searchTrade()});
 canvas.addEventListener('wheel',e=>{if(!bars.length)return;e.preventDefault();let old=visible;visible=Math.max(20,Math.min(bars.length,Math.round(visible*(e.deltaY>0?1.18:.84))));let rect=canvas.getBoundingClientRect(),ratio=(e.clientX-rect.left)/rect.width;viewStart=Math.max(0,Math.min(bars.length-visible,viewStart+Math.round((old-visible)*ratio)));draw();scheduleSave()},{passive:false});
 let drag=null;canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,start:viewStart,moved:false};canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!drag||!bars.length)return;let dx=e.clientX-drag.x;if(Math.abs(dx)>4)drag.moved=true;if(drag.moved){let plot=canvas.clientWidth-84;viewStart=Math.max(0,Math.min(bars.length-visible,drag.start-Math.round(dx/plot*visible)));draw();scheduleSave()}});canvas.addEventListener('pointerup',e=>{if(drag&&!drag.moved&&bars.length){let rect=canvas.getBoundingClientRect(),idx=viewStart+Math.floor((e.clientX-rect.left-12)/(canvas.clientWidth-84)*visible);let nearest=-1,dist=Infinity;trades.forEach((t,i)=>{let d=Math.abs(t.entryIndex-idx);if(d<dist){dist=d;nearest=i}});if(nearest>=0&&dist<Math.max(3,visible*.035))focusTrade(nearest)}drag=null;scheduleSave()});
+
+
+let expandedChart=null;
+function setExpandedChart(mode){
+ const live=$('livePanel'),chart=document.querySelector('.chartpanel');
+ if(mode==='live'){
+  const turnOn=!live.classList.contains('expanded');
+  live.classList.toggle('expanded',turnOn);chart.classList.remove('expanded');
+  document.body.classList.toggle('live-expanded',turnOn);document.body.classList.remove('chart-expanded');
+  $('expandLive').textContent=turnOn?'⤢ Restaurar tamaño':'⛶ Ampliar gráfico';$('expandLive').setAttribute('aria-pressed',String(turnOn));
+  $('expandReplay').textContent='⛶ Ampliar gráfico';$('expandReplay').setAttribute('aria-pressed','false');
+  expandedChart=turnOn?'live':null;
+ }else{
+  const turnOn=!chart.classList.contains('expanded');
+  chart.classList.toggle('expanded',turnOn);live.classList.remove('expanded');
+  document.body.classList.toggle('chart-expanded',turnOn);document.body.classList.remove('live-expanded');
+  $('expandReplay').textContent=turnOn?'⤢ Restaurar tamaño':'⛶ Ampliar gráfico';$('expandReplay').setAttribute('aria-pressed',String(turnOn));
+  $('expandLive').textContent='⛶ Ampliar gráfico';$('expandLive').setAttribute('aria-pressed','false');
+  expandedChart=turnOn?'replay':null;
+ }
+ if(mode==='replay')resize();
+ else if(typeof resize==='function')resize();
+}
+$('expandLive').addEventListener('click',()=>setExpandedChart('live'));
+$('expandReplay').addEventListener('click',()=>setExpandedChart('replay'));
+function closeExpandedChart(){if(!expandedChart)return;const mode=expandedChart;expandedChart=null;if(mode==='live'){ $('livePanel').classList.remove('expanded');document.body.classList.remove('live-expanded');$('expandLive').textContent='⛶ Ampliar gráfico';$('expandLive').setAttribute('aria-pressed','false')}else{document.querySelector('.chartpanel').classList.remove('expanded');document.body.classList.remove('chart-expanded');$('expandReplay').textContent='⛶ Ampliar gráfico';$('expandReplay').setAttribute('aria-pressed','false');resize()}}
+window.addEventListener('keydown',e=>{if(e.key==='Escape')closeExpandedChart()});
 
 function liveChartUrl(){
  const symbol=($('liveSymbol').value||'PEPPERSTONEUK:XAUUSD').trim().toUpperCase();

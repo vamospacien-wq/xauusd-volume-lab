@@ -149,7 +149,7 @@ async function refreshSavedDatasets(selectId=''){
  const sel=$('savedCsv');if(!sel)return;
  sel.disabled=true;$('loadSavedCsv').disabled=true;$('deleteDataset').disabled=true;$('historyCount').textContent='Leyendo archivos guardados…';
  let db=null,timer=null;
- const timeout=(promise,label,ms=12000)=>Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(label+' tardó más de '+Math.round(ms/1000)+' segundos. Pulsa «Recargar historial» para reintentar; no vuelvas a subir el CSV.')),ms)})]);
+ const timeout=(promise,label,ms=12000)=>{let localTimer;return Promise.race([promise,new Promise((_,reject)=>{localTimer=setTimeout(()=>reject(Error(label+' tardó más de '+Math.round(ms/1000)+' segundos. Pulsa «Recargar historial» para reintentar; no vuelvas a subir el CSV.')),ms)})]).finally(()=>{if(localTimer)clearTimeout(localTimer)})};
  try{
   db=await timeout(openSessionDB(),'Abrir la base local',8000);
   let all=await timeout(new Promise((resolve,reject)=>{const tx=db.transaction(DATASET_META_STORE,'readonly'),req=tx.objectStore(DATASET_META_STORE).getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error||Error('No se pudo leer el índice'));tx.onabort=()=>reject(tx.error||Error('Se canceló la lectura del índice'))}),'Leer el índice del historial');

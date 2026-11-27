@@ -1,10 +1,10 @@
 {
   "ready": true,
-  "generated_at_utc": "2026-11-27T10:43:47+00:00",
-  "generated_at_bogota": "2026-11-27T05:43:47-05:00",
+  "generated_at_utc": "2026-11-27T11:38:33+00:00",
+  "generated_at_bogota": "2026-11-27T06:38:33-05:00",
   "source": "Binance PAXGUSDT (proxy del oro; puede diferir del spot XAUUSD)",
-  "price": 3665.96,
-  "change_24h_pct": 3.22,
+  "price": 3665.25,
+  "change_24h_pct": 2.88,
   "bias": "bajista",
   "score": -4,
   "trend": {
@@ -35,10 +35,10 @@
   },
   "signal": {
     "side": "venta",
-    "entry": 3665.96,
-    "sl": 3708.12,
-    "tp1": 3602.71,
-    "tp2": 3560.55,
+    "entry": 3665.25,
+    "sl": 3707.41,
+    "tp1": 3602.0,
+    "tp2": 3559.84,
     "rr1": 1.5,
     "basis": "Riesgo = 1 ATR(14) en 4h"
   },
@@ -493,7 +493,7 @@
       "closes": "12:00 p. m.",
       "high": 3673.0,
       "low": 3646.76,
-      "change_pct": 0.53,
+      "change_pct": 0.51,
       "range": 26.24
     },
     {
@@ -509,7 +509,7 @@
   "events_source": "Forex Factory (feed gratuito de Fair Economy) · USD, impacto medio y alto · hora de Bogotá",
   "summary": [
     "Sesgo bajista (puntuación -4 de ±6). Diario: tendencia bajista; 4h: bajista.",
-    "Precio 3665.96 frente a EMA20 3735.73, EMA50 3913.22 y EMA200 4258.04 en diario.",
+    "Precio 3665.25 frente a EMA20 3735.73, EMA50 3913.22 y EMA200 4258.04 en diario.",
     "RSI(14): 31 en diario y 62 en 4h. ATR diario ≈ 91.16 USD.",
     "Volumen de ayer: 0.57× el promedio de 20 días.",
     "Pivote 3570.81; resistencias 3593.71 / 3625.96; soportes 3538.56 / 3515.66."

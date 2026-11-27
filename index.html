@@ -156,12 +156,38 @@ body.replay-active #replayToggle:before{content:"● ";font-size:9px}
 #lsMsg{min-height:14px;color:#b52e45}
 .livepanel.expanded .live-setup{position:fixed;bottom:max(62px,calc(env(safe-area-inset-bottom) + 56px));z-index:10001}
 .livepanel.replay-mounted .live-setup{display:none}
+
+#goldMain[hidden]{display:none!important}
+.goldwrap{max-width:1100px;margin:auto;padding:18px;display:grid;gap:14px}
+.gold-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.gold-head h2{margin:0;font-size:18px}.gold-head .meta{color:var(--muted);font-size:12px;margin-top:4px}
+.gold-price{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}.gold-price b{font-size:34px;color:var(--gold);letter-spacing:-.5px}
+.gold-badge{border-radius:20px;padding:5px 11px;font-weight:700;font-size:12px;border:1px solid var(--line)}
+.gold-badge.alcista{color:#7ff0cb;border-color:#1aa884;background:#0f3a33}.gold-badge.bajista{color:#ff9aa4;border-color:#a43b46;background:#3a151b}.gold-badge.neutral{color:#cbd8e8;background:#1a2b42}
+.gold-up{color:var(--green)}.gold-down{color:var(--red)}
+.gold-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.gold-list{margin:0;padding:0;list-style:none;display:grid;gap:8px}.gold-list li{line-height:1.45}
+.gold-levels{width:100%;border-collapse:collapse}.gold-levels td{padding:6px 0;border-bottom:1px solid var(--line)}.gold-levels td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.gold-levels tr.now td{color:var(--gold);font-weight:700}
+.gold-sig{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.gold-sig span{color:var(--muted);font-size:12px}.gold-sig b{display:block;font-size:16px;font-variant-numeric:tabular-nums}
+.gold-note{color:var(--muted);font-size:12px;line-height:1.5}
+.gold-warn{border:1px solid #7a5c20;background:#2a2112;color:#f0d9a0;border-radius:10px;padding:10px 12px;font-size:13px}
+@media(max-width:580px){.goldwrap{padding:10px}.gold-price b{font-size:28px}}
+.gold-chart{width:100%;height:320px;display:block;border-radius:8px;background:#0c1727}
+.gold-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12px;color:var(--muted)}.gold-legend i{display:inline-block;width:14px;height:0;border-top:2px solid;margin-right:5px;vertical-align:middle}
+.gold-ai{white-space:pre-line;line-height:1.55}
+.gold-imp{display:inline-block;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px}
+.gold-imp.High{background:#3a151b;color:#ff9aa4;border:1px solid #a43b46}.gold-imp.Medium{background:#2a2112;color:#f0d9a0;border:1px solid #7a5c20}
+.gold-ev{display:grid;grid-template-columns:78px 1fr;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--line)}.gold-ev .t{color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}.gold-ev .d{color:var(--muted);font-size:12px;grid-column:2}
+.gold-sess{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--line)}.gold-sess .d{color:var(--muted);font-size:12px;grid-column:1/3}
+.gold-st{font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;border:1px solid var(--line);color:#cbd8e8}.gold-st.en-curso{color:#7ff0cb;border-color:#1aa884;background:#0f3a33}
 </style><link rel="preconnect" href="https://s3.tradingview.com" crossorigin><link rel="preconnect" href="https://s.tradingview.com" crossorigin></head>
 <body>
 <header><div class="brand"><div class="logo">VL</div><div><h1>XAUUSD · Volume Lab</h1><div class="sub">Terminal de mercado · gráfico en vivo + replay y backtesting histórico</div></div></div><div class="tag">TERMINAL · LIVE / REPLAY</div></header>
 <nav class="terminal-nav" aria-label="Modo de terminal">
  <button class="navtab active" id="tabLive" type="button">◉ Mercado en vivo</button>
  <button class="navtab" id="tabReplay" type="button">◷ Replay y backtesting</button>
+ <button class="navtab" id="tabGold" type="button">🥇 Análisis diario</button>
  <span class="navnote">Gráfico de mercado integrado · datos y cobertura según proveedor</span>
 </nav>
 <section class="livepanel" id="livePanel">
@@ -180,6 +206,27 @@ body.replay-active #replayToggle:before{content:"● ";font-size:9px}
 <div class="row"><button class="btn primary" id="lsStart" type="button">▶ Iniciar Replay</button><button class="btn" id="lsCsv" type="button">Usar mi CSV</button><button class="btn" id="lsClose" type="button">✕</button></div><div id="lsMsg" role="status"></div></div><button class="live-fs-btn" id="liveFsBtn" type="button" aria-label="Pantalla completa" title="Pantalla completa">⛶</button><button class="replay-launch" id="liveReplayLaunch" type="button" aria-label="Abrir controles de Replay">◷ Replay</button></div>
  <div class="live-replay-dock"><div><strong>Replay dentro del gráfico</strong><span>Abre tus velas CSV en este mismo espacio, con volumen visible, reproducción, avance por vela y control de velocidad. Para repetir el histórico de un mercado en vivo, primero carga sus datos CSV.</span></div><button class="btn primary" id="liveReplayCsv" type="button">▶ Replay en este gráfico</button><button class="btn" id="liveReplayGo" type="button">Replay nativo GoCharting ↗</button></div><button class="btn live-return" id="returnLiveChart" type="button" hidden>↶ Volver a mercado en vivo</button><div id="liveReplayMount"></div><div class="livefoot">Gráfico de TradingView integrado mediante su widget gratuito. La disponibilidad de símbolos, indicadores y datos en tiempo real depende de TradingView y de su proveedor. El Replay y el backtesting CSV funcionan de forma independiente.</div>
 </section>
+<main id="goldMain" class="goldwrap" hidden>
+ <div class="gold-head"><div><h2>Análisis diario del oro</h2><div class="meta" id="goldMeta">Cargando…</div></div><button class="btn" id="goldRefresh" type="button">↻ Actualizar</button></div>
+ <div id="goldWarn" class="gold-warn" hidden></div>
+ <section class="panel"><div class="gold-price"><b id="goldPrice">—</b><span id="goldChange"></span><span class="gold-badge neutral" id="goldBias">—</span></div></section>
+ <section class="panel"><h2>Plan del día</h2><ul class="gold-list" id="goldPlan"></ul></section>
+ <section class="panel"><h2>Gráfico de niveles · velas de 4 h</h2><canvas id="goldChart" class="gold-chart" aria-label="Gráfico de niveles del oro"></canvas><div class="gold-legend" id="goldLegend"></div></section>
+ <section class="panel" id="goldAiPanel" hidden><h2>Comentario de Claude</h2><div class="gold-ai" id="goldAi"></div><p class="gold-note" id="goldAiNote"></p></section>
+ <div class="gold-cols">
+  <section class="panel"><h2>Sesiones (hora de Bogotá)</h2><div id="goldSess"></div></section>
+  <section class="panel"><h2>Eventos de USD hoy</h2><div id="goldEv"></div><p class="gold-note" id="goldEvNote"></p></section>
+ </div>
+ <div class="gold-cols">
+  <section class="panel"><h2>Lectura técnica</h2><ul class="gold-list" id="goldSummary"></ul></section>
+  <section class="panel"><h2>Niveles clave</h2><table class="gold-levels"><tbody id="goldLevels"></tbody></table></section>
+ </div>
+ <div class="gold-cols">
+  <section class="panel"><h2>Señal de ejemplo</h2><div class="gold-sig" id="goldSignal"></div><p class="gold-note" id="goldSignalNote"></p></section>
+  <section class="panel"><h2>Escenarios del gráfico</h2><ul class="gold-list" id="goldScen"></ul></section>
+ </div>
+ <p class="gold-note" id="goldNotes"></p>
+</main>
 <main id="replayMain" hidden>
 <aside class="sidebar">
  <section class="panel"><h2>1 · Datos del mercado</h2>
@@ -534,9 +581,9 @@ let tvWidget=null,tvScriptLoading=false,tvScriptReady=false;
 function initTradingView(){if(tvWidget){return}const container=$('tvChartContainer');if(!container)return;const status=$('tvChartStatus');if(status)status.remove();if(!window.TradingView){if(tvScriptLoading)return;tvScriptLoading=true;const script=document.createElement('script');script.src='https://s3.tradingview.com/tv.js';script.async=true;script.onload=()=>{tvScriptReady=true;tvScriptLoading=false;createTradingViewWidget()};script.onerror=()=>{tvScriptLoading=false;container.innerHTML='<div class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>No se pudo cargar TradingView</h2><p>Comprueba tu conexión e inténtalo de nuevo, o abre GoCharting externamente.</p><button class="btn primary" id="openGoChartingMain" type="button">Abrir GoCharting ↗</button></div>';$('openGoChartingMain')?.addEventListener('click',()=>window.open(goChartingUrl(),'_blank','noopener'))};document.head.appendChild(script);return}createTradingViewWidget()}
 function createTradingViewWidget(){if(tvWidget||!window.TradingView)return;const container=$('tvChartContainer');container.innerHTML='<div id="tv_chart_inner" style="width:100%;height:100%;min-height:430px"></div>';tvWidget=new TradingView.widget({container_id:'tv_chart_inner',autosize:true,symbol:tradingViewSymbol(normalizedSymbol()),interval:'60',timezone:'America/Bogota',theme:'dark',style:'1',locale:'es',toolbar_bg:'#111c2e',enable_publishing:false,allow_symbol_change:true,hide_side_toolbar:false,details:false,hotlist:false,calendar:false,withdateranges:true,save_image:false,studies:['Volume@tv-basicstudies'],support_host:'https://www.tradingview.com'});if(tvWidget&&typeof tvWidget.onChartReady==='function')tvWidget.onChartReady(()=>{try{tvWidget.activeChart().setSymbol(tradingViewSymbol(normalizedSymbol()))}catch(e){}})}
 function loadLiveChart(){const sym=normalizedSymbol();$('liveSymbol').value=sym;const url=goChartingUrl();$('openProvider').onclick=()=>window.open(url,'_blank','noopener');initTradingView();if(tvWidget){try{tvWidget.activeChart().setSymbol(tradingViewSymbol(sym))}catch(e){}}}
-const livePanelEl=$('livePanel'),liveReplayMount=$('liveReplayMount'),liveChartPanel=document.querySelector('.chartpanel'),liveChartOriginalParent=liveChartPanel?.parentElement,liveChartOriginalNext=liveChartPanel?.nextElementSibling;function restoreReplayChart(){if(liveChartPanel&&liveChartOriginalParent&&liveChartPanel.parentElement!==liveChartOriginalParent){liveChartOriginalParent.insertBefore(liveChartPanel,liveChartOriginalNext&&liveChartOriginalNext.parentElement===liveChartOriginalParent?liveChartOriginalNext:null);livePanelEl.classList.remove('replay-mounted');$('returnLiveChart').hidden=true;$('liveReplayCsv').hidden=false;requestAnimationFrame(()=>{resize();if(bars.length)draw()})}}function setTerminalMode(mode){const live=mode==='live';if(!live)restoreReplayChart();$('tabLive').classList.toggle('active',live);$('tabReplay').classList.toggle('active',!live);$('livePanel').hidden=!live;$('replayMain').hidden=live;if(!live){if(bars.length)updateReplayControls();requestAnimationFrame(()=>{resize();if(bars.length)draw()})}if(live)initTradingView()}
+const livePanelEl=$('livePanel'),liveReplayMount=$('liveReplayMount'),liveChartPanel=document.querySelector('.chartpanel'),liveChartOriginalParent=liveChartPanel?.parentElement,liveChartOriginalNext=liveChartPanel?.nextElementSibling;function restoreReplayChart(){if(liveChartPanel&&liveChartOriginalParent&&liveChartPanel.parentElement!==liveChartOriginalParent){liveChartOriginalParent.insertBefore(liveChartPanel,liveChartOriginalNext&&liveChartOriginalNext.parentElement===liveChartOriginalParent?liveChartOriginalNext:null);livePanelEl.classList.remove('replay-mounted');$('returnLiveChart').hidden=true;$('liveReplayCsv').hidden=false;requestAnimationFrame(()=>{resize();if(bars.length)draw()})}}function setTerminalMode(mode){const gold=mode==='gold';document.getElementById('goldMain').hidden=!gold;document.getElementById('tabGold').classList.toggle('active',gold);if(gold){restoreReplayChart();$('tabLive').classList.remove('active');$('tabReplay').classList.remove('active');$('livePanel').hidden=true;$('replayMain').hidden=true;window.loadGold&&window.loadGold();return}const live=mode==='live';if(!live)restoreReplayChart();$('tabLive').classList.toggle('active',live);$('tabReplay').classList.toggle('active',!live);$('livePanel').hidden=!live;$('replayMain').hidden=live;if(!live){if(bars.length)updateReplayControls();requestAnimationFrame(()=>{resize();if(bars.length)draw()})}if(live)initTradingView()}
 $('liveReplayCsv').onclick=()=>{if(!bars.length){setTerminalMode('replay');$('status').textContent='Carga un CSV desde Datos del mercado o abre uno del historial guardado. Después vuelve aquí y pulsa Replay en este gráfico.';document.getElementById('csvDropZone')?.scrollIntoView({behavior:'smooth',block:'center'});return}if(liveChartPanel&&liveReplayMount){liveReplayMount.appendChild(liveChartPanel);livePanelEl.classList.add('replay-mounted');$('returnLiveChart').hidden=false;$('liveReplayCsv').hidden=true;setTerminalMode('live');if(!replayOn)activateReplay();else{updateReplayControls();draw()}requestAnimationFrame(()=>{resize();draw();liveReplayMount.scrollIntoView({behavior:'smooth',block:'start'})})}};$('returnLiveChart').onclick=restoreReplayChart;$('liveReplayGo').onclick=()=>window.open(goChartingUrl(),'_blank','noopener');
-$('liveFsBtn').onclick=()=>$('expandLive').click();$('tabLive').onclick=()=>setTerminalMode('live');$('tabReplay').onclick=()=>setTerminalMode('replay');$('loadLive').onclick=loadLiveChart;$('liveSymbol').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadLiveChart()}});$('liveSymbol').addEventListener('change',loadLiveChart);
+$('liveFsBtn').onclick=()=>$('expandLive').click();$('tabLive').onclick=()=>setTerminalMode('live');$('tabReplay').onclick=()=>setTerminalMode('replay');$('tabGold').onclick=()=>setTerminalMode('gold');$('loadLive').onclick=loadLiveChart;$('liveSymbol').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadLiveChart()}});$('liveSymbol').addEventListener('change',loadLiveChart);
 function updateReplayControls(){
  const hasData=Array.isArray(bars)&&bars.length>0,range=$('replayRange');
  range.max=String(Math.max(0,bars.length-1));range.value=String(Math.max(0,Math.min(replayIndex,bars.length-1)));range.disabled=!hasData;
@@ -642,4 +689,75 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('resize',resize);resize();stats();restoreSession();loadLiveChart();
 })();
 
+</script><script>
+(function(){
+ var g=function(id){return document.getElementById(id)};
+ var RAW='https://raw.githubusercontent.com/vamospacien-wq/xauusd-volume-lab/main/data/gold-analysis.json';
+ var LOCAL='data/gold-analysis.json';
+ var fmt=function(n){return n==null?'—':Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
+ function get(url){return fetch(url+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+ function li(parent,text,strong){var e=document.createElement('li');if(strong){var b=document.createElement('b');b.textContent=strong+' ';e.appendChild(b)}e.appendChild(document.createTextNode(text));parent.appendChild(e)}
+ function clear(id){var e=g(id);e.textContent='';return e}
+ function render(d){
+  var warn=g('goldWarn');warn.hidden=true;
+  if(!d||!d.ready){g('goldMeta').textContent='Todavía no hay análisis publicado.';warn.hidden=false;warn.textContent='El primer análisis aparecerá cuando se ejecute el proceso diario de GitHub Actions (también puedes lanzarlo a mano desde la pestaña Actions).';return}
+  var when=new Date(d.generated_at_utc);
+  var txt=when.toLocaleString('es-CO',{timeZone:'America/Bogota',weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit'});
+  g('goldMeta').textContent='Actualizado: '+txt+' (hora de Bogotá) · '+d.source;
+  var ageH=(Date.now()-when.getTime())/36e5;
+  if(ageH>30){warn.hidden=false;warn.textContent='Este análisis tiene más de '+Math.floor(ageH)+' horas. Revisa que el proceso diario de GitHub Actions esté funcionando.'}
+  g('goldPrice').textContent='$'+fmt(d.price);
+  var ch=g('goldChange');ch.textContent=(d.change_24h_pct>=0?'+':'')+d.change_24h_pct.toFixed(2)+'% en 24 h';ch.className=d.change_24h_pct>=0?'gold-up':'gold-down';
+  var b=g('goldBias');b.textContent='Sesgo '+d.bias;b.className='gold-badge '+d.bias;
+  var sm=clear('goldSummary');d.summary.forEach(function(t){li(sm,t)});
+  var L=d.levels,rows=[['Resistencia 2',L.r2],['Resistencia 1',L.r1],['Pivote',L.pivot],['Soporte 1',L.s1],['Soporte 2',L.s2],['Máximo 20 días',L.high20],['Mínimo 20 días',L.low20]];
+  rows.push(['Precio actual',d.price]);rows.sort(function(a,b){return b[1]-a[1]});
+  var lv=clear('goldLevels');rows.forEach(function(r){var tr=document.createElement('tr');if(r[0]==='Precio actual')tr.className='now';var a=document.createElement('td');a.textContent=r[0];var c=document.createElement('td');c.textContent=fmt(r[1]);tr.appendChild(a);tr.appendChild(c);lv.appendChild(tr)});
+  var sg=clear('goldSignal'),s=d.signal||{};
+  if(s.side==='ninguna'||!s.side){var p=document.createElement('div');p.textContent='Sin señal: el sesgo es neutral. Conviene esperar una ruptura clara de los niveles.';sg.appendChild(p);g('goldSignalNote').textContent=''}
+  else{[['Dirección',s.side],['Entrada',fmt(s.entry)],['Stop loss',fmt(s.sl)],['Take profit 1',fmt(s.tp1)],['Take profit 2',fmt(s.tp2)],['Relación R:B (TP1)',s.rr1+' : 1']].forEach(function(x){var w=document.createElement('div');var sp=document.createElement('span');sp.textContent=x[0];var bb=document.createElement('b');bb.textContent=x[1];w.appendChild(sp);w.appendChild(bb);sg.appendChild(w)});g('goldSignalNote').textContent=s.basis+'. Ejemplo educativo, no una recomendación.'}
+  var sc=clear('goldScen');d.scenarios.forEach(function(x){li(sc,x.text,x.name+':')});
+  g('goldNotes').textContent=d.notes.join(' ');
+  var pl=clear('goldPlan');(d.plan||[]).forEach(function(t){li(pl,t)});
+  function row(cls){var e=document.createElement('div');e.className=cls;return e}
+  var ss=clear('goldSess');(d.sessions||[]).forEach(function(x){var r=row('gold-sess');var a=document.createElement('b');a.textContent=x.name;var st=document.createElement('span');st.className='gold-st '+x.status.replace(' ','-');st.textContent=x.status;r.appendChild(a);r.appendChild(st);var dd=row('d');var t=x.opens+' – '+x.closes;if(x.high!=null)t+=' · rango '+fmt(x.low)+'–'+fmt(x.high)+' ('+(x.change_pct>=0?'+':'')+x.change_pct.toFixed(2)+'%)';dd.textContent=t;r.appendChild(dd);ss.appendChild(r)});
+  var ev=clear('goldEv');
+  function addEv(e,withDay){var r=row('gold-ev');var t=document.createElement('span');t.className='t';t.textContent=(withDay?e.day+' ':'')+e.time;var n=document.createElement('span');n.appendChild(document.createTextNode(e.title));var im=document.createElement('span');im.className='gold-imp '+e.impact;im.textContent=e.impact==='High'?'Alto':'Medio';n.appendChild(im);r.appendChild(t);r.appendChild(n);if(e.forecast||e.previous){var dd=row('d');dd.textContent='Pronóstico '+(e.forecast||'—')+' · Previo '+(e.previous||'—');r.appendChild(dd)}ev.appendChild(r)}
+  if(d.events_ok===false){var m=document.createElement('p');m.className='gold-note';m.textContent='No se pudo leer el calendario hoy. Revísalo manualmente antes de operar.';ev.appendChild(m)}
+  else if(!(d.events_today||[]).length){var m2=document.createElement('p');m2.className='gold-note';m2.textContent='Sin eventos de USD de impacto medio o alto hoy.';ev.appendChild(m2)}
+  else d.events_today.forEach(function(e){addEv(e,false)});
+  if((d.events_upcoming||[]).length){var h3=document.createElement('p');h3.className='gold-note';h3.style.marginTop='12px';h3.textContent='Próximos de impacto alto:';ev.appendChild(h3);d.events_upcoming.forEach(function(e){addEv(e,true)})}
+  g('goldEvNote').textContent=d.events_source||'';
+
+  lastData=d;drawChart(d);
+  var ap=g('goldAiPanel');if(d.ai_commentary){ap.hidden=false;g('goldAi').textContent=d.ai_commentary;g('goldAiNote').textContent='Redactado por '+(d.ai_model||'Claude')+' solo con los datos de arriba. Contenido educativo.'}else{ap.hidden=true}
+ }
+
+ function drawChart(d){
+  var cv=g('goldChart'),lg=clear('goldLegend');if(!cv||!d.chart||!d.chart.candles.length)return;
+  var dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(!W)return;cv.width=W*dpr;cv.height=H*dpr;
+  var x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+  var C=d.chart.candles,L=d.levels,I=d.indicators,S=d.signal||{};
+  var lines=[['R2',L.r2,'#ef5967',[]],['R1',L.r1,'#ef8a93',[]],['Pivote',L.pivot,'#e8b75b',[]],['S1',L.s1,'#5fd3ae',[]],['S2',L.s2,'#19b889',[]],['EMA20 D',I.ema20,'#56a6ff',[4,4]],['EMA50 D',I.ema50,'#a78bfa',[4,4]]];
+  if(S.side&&S.side!=='ninguna'){lines.push(['SL',S.sl,'#ff6b78',[2,3]],['TP1',S.tp1,'#7ff0cb',[2,3]])}
+  var lo=Math.min.apply(null,C.map(function(c){return c[3]})),hi=Math.max.apply(null,C.map(function(c){return c[2]}));
+  var pad=(I.atr_daily||(hi-lo)*.2)*1.5,vis=lines.filter(function(l){return l[1]>=lo-pad&&l[1]<=hi+pad});
+  vis.forEach(function(l){lo=Math.min(lo,l[1]);hi=Math.max(hi,l[1])});
+  var m=(hi-lo)*.06;lo-=m;hi+=m;
+  var pl=8,pr=58,pt=10,pb=18,cw=W-pl-pr,ch=H-pt-pb;
+  var Y=function(v){return pt+(hi-v)/(hi-lo)*ch};
+  x.font='11px system-ui,sans-serif';x.textBaseline='middle';
+  x.strokeStyle='#1c2b40';x.lineWidth=1;x.fillStyle='#8da1ba';x.textAlign='left';
+  for(var i=0;i<=4;i++){var v=lo+(hi-lo)*i/4,y=Y(v);x.beginPath();x.moveTo(pl,y);x.lineTo(W-pr,y);x.stroke();x.fillText(v.toFixed(0),W-pr+6,y)}
+  var step=cw/C.length,bw=Math.max(2,step*.62);
+  C.forEach(function(c,k){var cx=pl+step*(k+.5),up=c[4]>=c[1],col=up?'#19b889':'#ef5967';x.strokeStyle=col;x.fillStyle=col;x.beginPath();x.moveTo(cx,Y(c[2]));x.lineTo(cx,Y(c[3]));x.stroke();var t=Y(Math.max(c[1],c[4])),b=Y(Math.min(c[1],c[4]));x.fillRect(cx-bw/2,t,bw,Math.max(1,b-t))});
+  vis.forEach(function(l){x.strokeStyle=l[2];x.fillStyle=l[2];x.lineWidth=1.2;x.setLineDash(l[3]);var y=Y(l[1]);x.beginPath();x.moveTo(pl,y);x.lineTo(W-pr,y);x.stroke();x.setLineDash([]);x.textAlign='left';x.fillText(l[0],W-pr+6,y-7)});
+  var py=Y(d.price);x.strokeStyle='#e8b75b';x.lineWidth=1;x.setLineDash([1,3]);x.beginPath();x.moveTo(pl,py);x.lineTo(W-pr,py);x.stroke();x.setLineDash([]);
+  x.fillStyle='#e8b75b';x.fillRect(W-pr,py-8,pr-2,16);x.fillStyle='#0b1220';x.textAlign='center';x.fillText(d.price.toFixed(1),W-pr+(pr-2)/2,py);
+  vis.forEach(function(l){var s=document.createElement('span');var i=document.createElement('i');i.style.borderColor=l[2];s.appendChild(i);s.appendChild(document.createTextNode(l[0]+' '+fmt(l[1])));lg.appendChild(s)});
+ }
+ var lastData=null;window.addEventListener('resize',function(){if(lastData&&!g('goldMain').hidden)drawChart(lastData)});
+ function load(){g('goldMeta').textContent='Cargando…';return get(RAW).catch(function(){return get(LOCAL)}).then(render).catch(function(){g('goldMeta').textContent='No se pudo cargar el análisis.';var w=g('goldWarn');w.hidden=false;w.textContent='No se pudo leer data/gold-analysis.json. Revisa que el archivo exista en el repositorio.'})}
+ window.loadGold=load;g('goldRefresh').onclick=load;
+})();
 </script></body></html>

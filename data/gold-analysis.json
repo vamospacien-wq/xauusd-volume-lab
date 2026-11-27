@@ -1,10 +1,10 @@
 {
   "ready": true,
-  "generated_at_utc": "2026-11-27T19:49:14+00:00",
-  "generated_at_bogota": "2026-11-27T14:49:14-05:00",
+  "generated_at_utc": "2026-11-27T23:41:35+00:00",
+  "generated_at_bogota": "2026-11-27T18:41:35-05:00",
   "source": "Binance PAXGUSDT (proxy del oro; puede diferir del spot XAUUSD)",
-  "price": 3645.41,
-  "change_24h_pct": 2.27,
+  "price": 3654.47,
+  "change_24h_pct": 2.61,
   "bias": "bajista",
   "score": -4,
   "trend": {
@@ -16,9 +16,9 @@
     "ema50": 3913.22,
     "ema200": 4258.04,
     "rsi_daily": 31.2,
-    "rsi_4h": 55.0,
+    "rsi_4h": 58.9,
     "atr_daily": 91.16,
-    "atr_4h": 42.34,
+    "atr_4h": 42.11,
     "volume_ratio": 0.57
   },
   "levels": {
@@ -35,23 +35,16 @@
   },
   "signal": {
     "side": "venta",
-    "entry": 3645.41,
-    "sl": 3687.75,
-    "tp1": 3581.9,
-    "tp2": 3539.56,
+    "entry": 3654.47,
+    "sl": 3696.58,
+    "tp1": 3591.3,
+    "tp2": 3549.19,
     "rr1": 1.5,
     "basis": "Riesgo = 1 ATR(14) en 4h"
   },
   "chart": {
     "interval": "4h",
     "candles": [
-      [
-        1794931200000,
-        3866.19,
-        3866.19,
-        3838.26,
-        3839.06
-      ],
       [
         1794945600000,
         3838.74,
@@ -464,6 +457,13 @@
         3663.71,
         3604.41,
         3617.44
+      ],
+      [
+        1795795200000,
+        3615.77,
+        3646.87,
+        3607.72,
+        3646.6
       ]
     ]
   },
@@ -481,22 +481,18 @@
     },
     {
       "name": "Londres",
-      "status": "cerrada",
+      "status": "pendiente",
       "opens": "3:00 a. m.",
-      "closes": "12:00 p. m.",
-      "high": 3673.0,
-      "low": 3604.41,
-      "change_pct": -0.65,
-      "range": 68.59
+      "closes": "12:00 p. m."
     },
     {
       "name": "Nueva York",
-      "status": "en curso",
+      "status": "cerrada",
       "opens": "8:00 a. m.",
       "closes": "5:00 p. m.",
       "high": 3661.16,
       "low": 3604.41,
-      "change_pct": -0.39,
+      "change_pct": -0.38,
       "range": 56.75
     }
   ],
@@ -506,8 +502,8 @@
   "events_source": "Forex Factory (feed gratuito de Fair Economy) · USD, impacto medio y alto · hora de Bogotá",
   "summary": [
     "Sesgo bajista (puntuación -4 de ±6). Diario: tendencia bajista; 4h: bajista.",
-    "Precio 3645.41 frente a EMA20 3735.73, EMA50 3913.22 y EMA200 4258.04 en diario.",
-    "RSI(14): 31 en diario y 55 en 4h. ATR diario ≈ 91.16 USD.",
+    "Precio 3654.47 frente a EMA20 3735.73, EMA50 3913.22 y EMA200 4258.04 en diario.",
+    "RSI(14): 31 en diario y 59 en 4h. ATR diario ≈ 91.16 USD.",
     "Volumen de ayer: 0.57× el promedio de 20 días.",
     "Pivote 3570.81; resistencias 3593.71 / 3625.96; soportes 3538.56 / 3515.66."
   ],

@@ -190,32 +190,6 @@ body.replay-active #replayToggle:before{content:"● ";font-size:9px}
 .livepanel.expanded .tvbar{display:none}
 .liveframe{overscroll-behavior:contain}
 body.live-expanded{overflow:hidden;overscroll-behavior:none;position:fixed;width:100%;inset-inline:0}
-
-/* Gráfico propio con dibujos guardados */
-.livepanel:not(.own-mode) #ownChart{display:none}
-.livepanel.own-mode #tvChartContainer,.livepanel.own-mode .tvbar{display:none!important}
-.livepanel.own-mode .live-fs-btn,.livepanel.own-mode .livewrap>.replay-launch{display:none!important}
-.liveframe.ownchart{display:flex;flex-direction:column;background:#0b1422;overflow:hidden;-webkit-user-select:none;user-select:none}
-.oc-top,.oc-tools{display:flex;gap:6px;align-items:center;overflow-x:auto;flex:0 0 auto;padding:6px 8px;background:#0e1a2b;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x}
-.oc-top{border-bottom:1px solid var(--line)}
-.oc-tools{border-top:1px solid var(--line);padding-bottom:max(6px,env(safe-area-inset-bottom))}
-.oc-top::-webkit-scrollbar,.oc-tools::-webkit-scrollbar{display:none}
-.oc-b{flex:0 0 auto;min-width:40px;height:36px;padding:0 11px;border:1px solid #30445d;background:#111e30;color:#cbd8e8;border-radius:10px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;touch-action:manipulation}
-.oc-b.on{background:#163a46;border-color:#1aa884;color:#e8fff8}
-.oc-b:disabled{opacity:.35}
-.oc-t{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:46px;min-width:58px;padding:0 8px}
-.oc-t .i{font-size:17px;line-height:1}
-.oc-t .l{font-size:10px;font-weight:600;line-height:1;color:inherit;opacity:.85}
-.oc-sep{flex:0 0 1px;align-self:stretch;background:#26364d;margin:2px 3px}
-.oc-sw{display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #0007}
-.oc-stage{position:relative;flex:1 1 auto;min-height:0;overflow:hidden}
-.oc-stage canvas{position:absolute;left:0;top:0;display:block;touch-action:none}
-.oc-msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;color:#a9bdd4;font-size:13px;line-height:1.5;pointer-events:none}
-.oc-msg.on{display:flex}
-.oc-msg .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;pointer-events:auto}
-.oc-toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:#111c2eF2;border:1px solid #38516e;color:#e8eef7;padding:8px 14px;border-radius:18px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s;max-width:90%;text-align:center}
-.oc-toast.on{opacity:1}
-.livepanel.own-mode .livehead{display:none!important}
 </style><link rel="preconnect" href="https://s3.tradingview.com" crossorigin><link rel="preconnect" href="https://s.tradingview.com" crossorigin></head>
 <body>
 <header><div class="brand"><div class="logo">VL</div><div><h1>XAUUSD · Volume Lab</h1><div class="sub">Terminal de mercado · gráfico en vivo + replay y backtesting histórico</div></div></div><div class="tag">TERMINAL · LIVE / REPLAY</div></header>
@@ -236,10 +210,10 @@ body.live-expanded{overflow:hidden;overscroll-behavior:none;position:fixed;width
   <div class="tvrow"><b>Temporalidad</b><span id="tvIvs" class="tvrow" style="margin:0"></span></div>
   <div class="tvrow"><b>Indicadores</b><span id="tvInds" class="tvrow" style="margin:0"></span></div>
   <div class="tvrow"><b>Otro símbolo</b><input id="tvCustom" type="text" autocapitalize="characters" autocomplete="off" placeholder="Ej: NASDAQ:NVDA" style="background:#0b1626;color:var(--text);border:1px solid #30445d;border-radius:16px;padding:8px 12px;min-height:34px;width:150px;font-size:12px"><button class="tvchip" id="tvCustomGo" type="button">Cargar</button></div>
-  <div class="tvrow"><b>Más</b><button class="tvchip" id="tvToOwn" type="button">✎ Gráfico con dibujos guardados</button><button class="tvchip" id="tvFull" type="button">⛶ Pantalla completa</button><button class="tvchip" id="tvNative" type="button" aria-pressed="false">Usar la barra de TradingView</button><button class="tvchip" id="tvOpenTV" type="button">Abrir en TradingView ↗</button></div>
-  <p class="tvnote" id="tvNote">Al cambiar algo con estos botones el gráfico se vuelve a cargar. Los dibujos de este gráfico de TradingView no se pueden guardar aquí: para guardarlos usa «Gráfico con dibujos guardados».</p>
+  <div class="tvrow"><b>Más</b><button class="tvchip" id="tvFull" type="button">⛶ Pantalla completa</button><button class="tvchip" id="tvNative" type="button" aria-pressed="false">Usar la barra de TradingView</button><button class="tvchip" id="tvOpenTV" type="button">Abrir en TradingView ↗</button></div>
+  <p class="tvnote" id="tvNote">Al cambiar algo con estos botones el gráfico se vuelve a cargar. Los dibujos de TradingView no se pueden guardar aquí: para conservarlos, ábrelo en TradingView con tu cuenta.</p>
  </details>
- <div class="livewrap"><div id="tvChartContainer" class="liveframe" aria-label="Gráfico de mercado de TradingView"><div id="tvChartStatus" class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>Preparando gráfico de mercado</h2><p>El gráfico gratuito de TradingView se cargará aquí. Si no aparece, puedes abrir la terminal externa.</p></div></div><div id="ownChart" class="liveframe ownchart" aria-label="Gráfico propio con herramientas de dibujo"></div><div class="live-setup" id="liveSetup" hidden><strong>Replay del mercado</strong>
+ <div class="livewrap"><div id="tvChartContainer" class="liveframe" aria-label="Gráfico de mercado de TradingView"><div id="tvChartStatus" class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>Preparando gráfico de mercado</h2><p>El gráfico gratuito de TradingView se cargará aquí. Si no aparece, puedes abrir la terminal externa.</p></div></div><div class="live-setup" id="liveSetup" hidden><strong>Replay del mercado</strong>
 <label>Instrumento (Binance)<input id="lsSymbol" list="lsSymbols" value="PAXGUSDT" autocapitalize="characters" autocomplete="off"></label><datalist id="lsSymbols"><option value="PAXGUSDT"><option value="BTC/USD"><option value="EUR/GBP"><option value="AUD/CAD"><option value="US100"><option value="US30"><option value="US500"><option value="BTCUSDT"><option value="ETHUSDT"><option value="SOLUSDT"><option value="BNBUSDT"><option value="XRPUSDT"><option value="DOGEUSDT"><option value="ADAUSDT"></datalist>
 <label>Temporalidad<select id="lsTf"><option value="1m">1 minuto</option><option value="5m">5 minutos</option><option value="15m" selected>15 minutos</option><option value="30m">30 minutos</option><option value="1h">1 hora</option><option value="4h">4 horas</option><option value="1d">1 día</option><option value="1w">1 semana</option></select></label>
 <label>Empezar desde (opcional)<input id="lsDate" type="date"></label>
@@ -618,7 +592,6 @@ function closeExpandedChart(){if(!expandedChart)return;const mode=expandedChart;
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeExpandedChart()});
 
 function normalizedSymbol(){let sym=($('liveSymbol').value||'OANDA:XAUUSD').trim().toUpperCase().replace(/\s+/g,'');if(!sym)return 'OANDA:XAUUSD';return sym}
-function ownIsOn(){try{return localStorage.getItem('xvl-own-on')!=='0'}catch(_){return true}}
 function tradingViewSymbol(sym){const map={'PEPPERSTONEUK:XAUUSD':'OANDA:XAUUSD','FX:XAUUSD':'OANDA:XAUUSD','PEPPERSTONEUK:EURUSD':'OANDA:EURUSD','FX:EURUSD':'OANDA:EURUSD','FX:GBPUSD':'OANDA:GBPUSD'};return map[sym]||sym}
 function goChartingUrl(){return 'https://gocharting.com/terminal?ticker='+encodeURIComponent(normalizedSymbol())}
 const TV_SYMBOLS=[['Oro','OANDA:XAUUSD'],['Bitcoin','BITSTAMP:BTCUSD'],['Nasdaq','OANDA:NAS100USD'],['S&P 500','OANDA:SPX500USD'],['DXY','TVC:DXY']];
@@ -629,19 +602,18 @@ let tvState={symbol:'OANDA:XAUUSD',interval:'60',inds:['vol'],native:false};
 try{const sv=JSON.parse(localStorage.getItem(TV_KEY)||'null');if(sv&&typeof sv==='object'){if(typeof sv.symbol==='string'&&sv.symbol)tvState.symbol=sv.symbol;if(TV_IVS.some(x=>x[1]===sv.interval))tvState.interval=sv.interval;if(Array.isArray(sv.inds))tvState.inds=sv.inds.filter(k=>TV_IND[k]);tvState.native=!!sv.native}}catch(_){}
 function tvSave(){try{localStorage.setItem(TV_KEY,JSON.stringify(tvState))}catch(_){}}
 let tvWidget=null,tvScriptLoading=false,tvScriptReady=false;
-function initTradingView(){if(ownIsOn()){window.ownShow&&window.ownShow();return}if(tvWidget){return}const container=$('tvChartContainer');if(!container)return;const status=$('tvChartStatus');if(status)status.remove();if(!window.TradingView){if(tvScriptLoading)return;tvScriptLoading=true;const script=document.createElement('script');script.src='https://s3.tradingview.com/tv.js';script.async=true;script.onload=()=>{tvScriptReady=true;tvScriptLoading=false;createTradingViewWidget()};script.onerror=()=>{tvScriptLoading=false;container.innerHTML='<div class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>No se pudo cargar TradingView</h2><p>Comprueba tu conexión e inténtalo de nuevo, o abre GoCharting externamente.</p><button class="btn primary" id="openGoChartingMain" type="button">Abrir GoCharting ↗</button></div>';$('openGoChartingMain')?.addEventListener('click',()=>window.open(goChartingUrl(),'_blank','noopener'))};document.head.appendChild(script);return}createTradingViewWidget()}
+function initTradingView(){if(tvWidget){return}const container=$('tvChartContainer');if(!container)return;const status=$('tvChartStatus');if(status)status.remove();if(!window.TradingView){if(tvScriptLoading)return;tvScriptLoading=true;const script=document.createElement('script');script.src='https://s3.tradingview.com/tv.js';script.async=true;script.onload=()=>{tvScriptReady=true;tvScriptLoading=false;createTradingViewWidget()};script.onerror=()=>{tvScriptLoading=false;container.innerHTML='<div class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>No se pudo cargar TradingView</h2><p>Comprueba tu conexión e inténtalo de nuevo, o abre GoCharting externamente.</p><button class="btn primary" id="openGoChartingMain" type="button">Abrir GoCharting ↗</button></div>';$('openGoChartingMain')?.addEventListener('click',()=>window.open(goChartingUrl(),'_blank','noopener'))};document.head.appendChild(script);return}createTradingViewWidget()}
 function tvStudies(){return tvState.inds.map(k=>TV_IND[k][1])}
 function tvOverrides(){return{'moving average exponential.length':20,'moving average.length':50}}
 function createTradingViewWidget(){if(tvWidget||!window.TradingView)return;const container=$('tvChartContainer');container.innerHTML='<div id="tv_chart_inner" style="width:100%;height:100%;min-height:430px"></div>';tvWidget=new TradingView.widget({container_id:'tv_chart_inner',autosize:true,symbol:tvState.symbol,interval:tvState.interval,timezone:'America/Bogota',theme:'dark',style:'1',locale:'es',toolbar_bg:'#111c2e',enable_publishing:false,allow_symbol_change:tvState.native,hide_top_toolbar:!tvState.native,hide_side_toolbar:false,details:false,hotlist:false,calendar:false,withdateranges:true,save_image:false,studies:tvStudies(),studies_overrides:tvOverrides(),support_host:'https://www.tradingview.com'})}
 function tvReload(){tvWidget=null;const c=$('tvChartContainer');if(c)c.innerHTML='';initTradingView()}
-window.tvReload=tvReload;window.initTradingView=initTradingView;
 function tvChip(label,on,fn){const b=document.createElement('button');b.type='button';b.className='tvchip'+(on?' on':'');b.textContent=label;b.setAttribute('aria-pressed',String(!!on));b.onclick=fn;return b}
 function tvRender(){const f=(id,items)=>{const el=$(id);el.textContent='';items.forEach(x=>el.appendChild(x))};
  f('tvSyms',TV_SYMBOLS.map(([l,v])=>tvChip(l,tvState.symbol===v,()=>{tvState.symbol=v;$('liveSymbol').value=v;tvSave();tvRender();tvReload()})));
  f('tvIvs',TV_IVS.map(([l,v])=>tvChip(l,tvState.interval===v,()=>{tvState.interval=v;tvSave();tvRender();tvReload()})));
  f('tvInds',Object.keys(TV_IND).map(k=>tvChip(TV_IND[k][0],tvState.inds.includes(k),()=>{tvState.inds=tvState.inds.includes(k)?tvState.inds.filter(x=>x!==k):tvState.inds.concat(k);tvSave();tvRender();tvReload()})));
  $('tvNative').classList.toggle('on',tvState.native);$('tvNative').setAttribute('aria-pressed',String(tvState.native));
- $('tvNote').textContent=tvState.native?'Barra de TradingView activa: lo que cambies dentro del gráfico (instrumento, temporalidad, indicadores) NO se recuerda al actualizar la página.':'Al cambiar algo con estos botones el gráfico se vuelve a cargar. Los dibujos de este gráfico de TradingView no se pueden guardar aquí: para guardarlos usa «Gráfico con dibujos guardados».';
+ $('tvNote').textContent=tvState.native?'Barra de TradingView activa: lo que cambies dentro del gráfico (instrumento, temporalidad, indicadores) NO se recuerda al actualizar la página.':'Al cambiar algo con estos botones el gráfico se vuelve a cargar. Los dibujos de TradingView no se pueden guardar aquí: para conservarlos, ábrelo en TradingView con tu cuenta.';
  $('liveSymbol').value=tvState.symbol;
  const sn=(TV_SYMBOLS.find(x=>x[1]===tvState.symbol)||[tvState.symbol])[0],iv=(TV_IVS.find(x=>x[1]===tvState.interval)||['',''])[0];
  $('tvSummary').textContent='⚙ '+sn+' · '+iv+(tvState.inds.length?' · '+tvState.inds.map(k=>TV_IND[k][0]).join(', '):'')+' ▾'}
@@ -830,393 +802,5 @@ window.addEventListener('resize',resize);resize();stats();restoreSession();loadL
  var lastData=null;window.addEventListener('resize',function(){if(lastData&&!g('goldMain').hidden)drawChart(lastData)});
  function load(){g('goldMeta').textContent='Cargando…';return get(RAW).catch(function(){return get(LOCAL)}).then(render).catch(function(){g('goldMeta').textContent='No se pudo cargar el análisis.';var w=g('goldWarn');w.hidden=false;w.textContent='No se pudo leer data/gold-analysis.json. Revisa que el archivo exista en el repositorio.'})}
  window.loadGold=load;g('goldRefresh').onclick=load;
-})();
-</script><script>
-(function(){
-'use strict';
-var g=function(id){return document.getElementById(id)};
-var root=g('ownChart'),panel=g('livePanel');
-if(!root||!panel)return;
-var K_ON='xvl-own-on',K_ST='xvl-own-state',K_DR='xvl-own-draw:';
-var SYMS=[['Oro','PAXGUSDT'],['Bitcoin','BTCUSDT'],['Ethereum','ETHUSDT'],['Solana','SOLUSDT']];
-var IVS=[['1m','1m',60000],['5m','5m',300000],['15m','15m',900000],['30m','30m',1800000],['1h','1h',3600000],['4h','4h',14400000],['1D','1d',86400000]];
-var COLORS=['#f5c542','#56a6ff','#19b889','#ef5967','#ffffff','#c084fc'];
-var TOOLS=[['select','✋','Mover'],['trend','╱','Tendencia'],['ray','➚','Rayo'],['hline','―','Horizontal'],['vline','│','Vertical'],['rect','▭','Rectángulo'],['fib','Fib','Fibonacci'],['pen','✎','Lápiz']];
-var TWO={trend:1,ray:1,rect:1,fib:1};
-var FIB=[0,0.236,0.382,0.5,0.618,0.786,1];
-var MONTHS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-var OFF=-5*3600000; /* Bogotá = UTC-5 */
-var AX=62,TX=22;
-var BG='#0b1422',GRID='#17263b',TXT='#8da1ba',UP='#19b889',DN='#ef5967';
-
-var st={sym:'PAXGUSDT',iv:'15m',ema:false,sma:false,magnet:false,color:COLORS[0],tool:'select'};
-try{var s0=JSON.parse(localStorage.getItem(K_ST)||'null');if(s0&&typeof s0==='object'){
- if(typeof s0.sym==='string'&&/^[A-Z0-9]{4,20}$/.test(s0.sym))st.sym=s0.sym;
- if(IVS.some(function(x){return x[1]===s0.iv}))st.iv=s0.iv;
- st.ema=!!s0.ema;st.sma=!!s0.sma;st.magnet=!!s0.magnet;
- if(COLORS.indexOf(s0.color)>=0)st.color=s0.color}}catch(_){}
-function saveSt(){try{localStorage.setItem(K_ST,JSON.stringify({sym:st.sym,iv:st.iv,ema:st.ema,sma:st.sma,magnet:st.magnet,color:st.color}))}catch(_){}}
-function ivMs(){for(var i=0;i<IVS.length;i++)if(IVS[i][1]===st.iv)return IVS[i][2];return 900000}
-
-/* ---------- DOM ---------- */
-root.innerHTML='<div class="oc-top" id="ocTop"></div><div class="oc-stage" id="ocStage"><canvas id="ocCv"></canvas><div class="oc-msg" id="ocMsg"></div><div class="oc-toast" id="ocToast"></div></div><div class="oc-tools" id="ocTools"></div>';
-var topEl=g('ocTop'),stage=g('ocStage'),cv=g('ocCv'),ctx=cv.getContext('2d'),msgEl=g('ocMsg'),toastEl=g('ocToast'),toolsEl=g('ocTools');
-function mk(parent,cls,html,fn,title){var b=document.createElement('button');b.type='button';b.className=cls;b.innerHTML=html;if(title){b.title=title;b.setAttribute('aria-label',title)}b.addEventListener('click',fn);parent.appendChild(b);return b}
-function sep(parent){var d=document.createElement('span');d.className='oc-sep';parent.appendChild(d)}
-var symBtns=[],ivBtns=[],toolBtns={},emaB,smaB,magB,colB,undoB,delB;
-mk(topEl,'oc-b','⛶',function(){var b=g('expandLive');if(b)b.click()},'Pantalla completa');
-SYMS.forEach(function(x){symBtns.push([x[1],mk(topEl,'oc-b',x[0],function(){setSym(x[1])})])});
-mk(topEl,'oc-b','＋',function(){var v=(window.prompt('Símbolo de Binance, por ejemplo BNBUSDT o XRPUSDT','')||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');if(v)setSym(v)},'Otro símbolo');
-sep(topEl);
-IVS.forEach(function(x){ivBtns.push([x[1],mk(topEl,'oc-b',x[0],function(){setIv(x[1])})])});
-sep(topEl);
-emaB=mk(topEl,'oc-b','EMA 20',function(){st.ema=!st.ema;saveSt();updateUI();dirty()});
-smaB=mk(topEl,'oc-b','SMA 50',function(){st.sma=!st.sma;saveSt();updateUI();dirty()});
-mk(topEl,'oc-b','Auto',function(){yman=null;dirty()},'Ajustar escala de precio');
-sep(topEl);
-mk(topEl,'oc-b','◷ Replay',function(){var b=g('liveReplayLaunch');if(b)b.click()});
-mk(topEl,'oc-b','TradingView',function(){ownHide()},'Volver al gráfico de TradingView');
-
-TOOLS.forEach(function(x){toolBtns[x[0]]=mk(toolsEl,'oc-b oc-t','<span class="i">'+x[1]+'</span><span class="l">'+x[2]+'</span>',function(){setTool(x[0])},x[2])});
-sep(toolsEl);
-magB=mk(toolsEl,'oc-b oc-t','<span class="i">🧲</span><span class="l">Imán</span>',function(){st.magnet=!st.magnet;saveSt();updateUI();toast(st.magnet?'Imán activado: se pega a máximos, mínimos, aperturas y cierres':'Imán desactivado')},'Imán a las velas');
-colB=mk(toolsEl,'oc-b oc-t','<span class="i"><span class="oc-sw"></span></span><span class="l">Color</span>',function(){cycleColor()},'Cambiar color');
-undoB=mk(toolsEl,'oc-b oc-t','<span class="i">↶</span><span class="l">Deshacer</span>',function(){doUndo()},'Deshacer');
-delB=mk(toolsEl,'oc-b oc-t','<span class="i">🗑</span><span class="l">Borrar</span>',function(){delSel()},'Borrar el dibujo seleccionado');
-mk(toolsEl,'oc-b oc-t','<span class="i">✕</span><span class="l">Todo</span>',function(){clearAll()},'Borrar todos los dibujos de este instrumento');
-
-/* ---------- estado ---------- */
-var bars=[],drawings=[],sel=null,undo=[],draft=null,pending=false,cross=null,yman=null;
-var view={t0:0,msPx:1},W=0,H=0,dpr=1,pMin=0,pMax=1,vMax=1,tick=1;
-var busy=false,tok=0,ws=null,pollT=null,wsFails=0,loadingOld=false,exhausted=false,raf=0,inited=false,tt=0;
-
-function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){toastEl.classList.remove('on')},2200)}
-function setMsg(text,err){
- if(!text){msgEl.classList.remove('on');msgEl.innerHTML='';return}
- msgEl.innerHTML='';var p=document.createElement('div');p.textContent=text;msgEl.appendChild(p);
- if(err){var r=document.createElement('div');r.className='row';mk(r,'oc-b','Reintentar',function(){loadBars()});mk(r,'oc-b','Oro (PAXG)',function(){setSym('PAXGUSDT')});mk(r,'oc-b','Usar TradingView',function(){ownHide()});msgEl.appendChild(r)}
- msgEl.classList.add('on')}
-
-function updateUI(){
- symBtns.forEach(function(x){x[1].classList.toggle('on',x[0]===st.sym)});
- ivBtns.forEach(function(x){x[1].classList.toggle('on',x[0]===st.iv)});
- emaB.classList.toggle('on',st.ema);smaB.classList.toggle('on',st.sma);
- for(var k in toolBtns)toolBtns[k].classList.toggle('on',k===st.tool);
- magB.classList.toggle('on',st.magnet);
- colB.querySelector('.oc-sw').style.background=st.color;
- undoB.disabled=!undo.length;delB.disabled=!sel}
-function setTool(t){st.tool=t;draft=null;pending=false;if(t!=='select')sel=null;updateUI();dirty();
- if(t==='trend'||t==='ray'||t==='rect'||t==='fib')toast('Toca dos puntos, o arrastra de uno a otro');
- else if(t==='hline'||t==='vline')toast('Toca o arrastra para colocar la línea');
- else if(t==='pen')toast('Dibuja con el dedo');
- else if(t==='select')toast('Toca un dibujo para moverlo; dos dedos para zoom')}
-function setSym(s){if(s===st.sym&&bars.length)return;st.sym=s;saveSt();loadDr();updateUI();loadBars()}
-function setIv(v){if(v===st.iv&&bars.length)return;st.iv=v;saveSt();updateUI();loadBars()}
-function cycleColor(){var i=(COLORS.indexOf(st.color)+1)%COLORS.length;st.color=COLORS[i];saveSt();
- var d=getSel();if(d){pushUndo();d.color=st.color;saveDr()}updateUI();dirty()}
-
-/* ---------- datos ---------- */
-function jget(path){
- function bad(r){return !r||!r.ok}
- return fetch('https://api.binance.com/api/v3/'+path).catch(function(){return null}).then(function(r){
-  if(!bad(r))return r;
-  return fetch('https://data-api.binance.vision/api/v3/'+path).catch(function(){throw Error('No se pudo conectar con Binance. Revisa tu conexión.')})
- }).then(function(r){
-  if(!r.ok)return r.json().catch(function(){return {}}).then(function(j){throw Error(j&&j.msg?('Binance: '+j.msg):('Binance respondió '+r.status))});
-  return r.json()})}
-function mapK(k){return {t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}}
-function loadBars(){
- var my=++tok;busy=true;stopFeed();bars=[];exhausted=false;loadingOld=false;wsFails=0;yman=null;cross=null;setMsg('Cargando '+st.sym+'…');dirty();
- return jget('klines?symbol='+encodeURIComponent(st.sym)+'&interval='+st.iv+'&limit=1000').then(function(a){
-  if(my!==tok)return;
-  bars=a.map(mapK);if(!bars.length)throw Error('Sin datos para '+st.sym);
-  busy=false;setMsg('');fitView();dirty();startFeed(my)
- }).catch(function(e){if(my!==tok)return;busy=false;setMsg(e.message||'No se pudieron cargar los datos',true)})}
-function loadOlder(){
- if(loadingOld||exhausted||!bars.length)return;loadingOld=true;var my=tok;
- jget('klines?symbol='+encodeURIComponent(st.sym)+'&interval='+st.iv+'&endTime='+(bars[0].t-1)+'&limit=1000').then(function(a){
-  if(my!==tok)return;loadingOld=false;
-  if(!a.length){exhausted=true;return}
-  bars=a.map(mapK).concat(bars);dirty()
- }).catch(function(){loadingOld=false;if(my===tok)exhausted=true})}
-function applyK(b){
- if(!bars.length)return;var last=bars[bars.length-1],ms=ivMs();
- if(b.t===last.t)bars[bars.length-1]=b;
- else if(b.t>last.t){var pw=W-AX,tR=view.t0+pw*view.msPx;if(tR>=last.t)view.t0+=(b.t-last.t);bars.push(b)}
- dirty()}
-function stopFeed(){if(ws){try{ws.onclose=null;ws.onerror=null;ws.close()}catch(_){}ws=null}if(pollT){clearInterval(pollT);pollT=null}}
-function startFeed(my){stopFeed();connectWS(my)}
-function connectWS(my){
- var hosts=['wss://stream.binance.com:9443','wss://data-stream.binance.vision'],w;
- try{w=new WebSocket(hosts[wsFails%2]+'/ws/'+st.sym.toLowerCase()+'@kline_'+st.iv)}catch(_){fallbackPoll(my);return}
- ws=w;
- w.onopen=function(){wsFails=0};
- w.onmessage=function(ev){try{var k=JSON.parse(ev.data).k;if(k)applyK({t:k.t,o:+k.o,h:+k.h,l:+k.l,c:+k.c,v:+k.v})}catch(_){}};
- w.onclose=function(){if(my!==tok||ws!==w)return;wsFails++;if(wsFails>=4)fallbackPoll(my);else setTimeout(function(){if(my===tok)connectWS(my)},1500)};
- w.onerror=function(){try{w.close()}catch(_){}}}
-function fallbackPoll(my){
- if(pollT)return;
- pollT=setInterval(function(){jget('klines?symbol='+encodeURIComponent(st.sym)+'&interval='+st.iv+'&limit=2').then(function(a){if(my!==tok)return;a.map(mapK).forEach(applyK)}).catch(function(){})},4000)}
-
-/* ---------- dibujos (guardado) ---------- */
-function validD(d){return d&&typeof d==='object'&&/^(trend|ray|hline|vline|rect|fib|pen)$/.test(d.type)&&typeof d.color==='string'&&Array.isArray(d.pts)&&d.pts.length>0&&d.pts.every(function(p){return p&&isFinite(p.t)&&isFinite(p.p)})}
-function loadDr(){try{var a=JSON.parse(localStorage.getItem(K_DR+st.sym)||'[]');drawings=Array.isArray(a)?a.filter(validD):[]}catch(_){drawings=[]}sel=null;undo=[];draft=null;pending=false}
-function saveDr(){try{localStorage.setItem(K_DR+st.sym,JSON.stringify(drawings))}catch(_){toast('No se pudo guardar en este navegador')}}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function pushUndo(){undo.push(JSON.stringify(drawings));if(undo.length>40)undo.shift();updateUI()}
-function doUndo(){if(!undo.length){toast('No hay nada que deshacer');return}drawings=JSON.parse(undo.pop());sel=null;saveDr();updateUI();dirty()}
-function getSel(){if(!sel)return null;for(var i=0;i<drawings.length;i++)if(drawings[i].id===sel)return drawings[i];return null}
-function delSel(){var d=getSel();if(!d)return;pushUndo();drawings=drawings.filter(function(x){return x!==d});sel=null;saveDr();updateUI();dirty()}
-function clearAll(){if(!drawings.length){toast('No hay dibujos en este instrumento');return}if(!window.confirm('¿Borrar todos los dibujos de '+st.sym+'?'))return;pushUndo();drawings=[];sel=null;saveDr();updateUI();dirty()}
-
-/* ---------- geometría ---------- */
-function lb(t){var lo=0,hi=bars.length;while(lo<hi){var m=(lo+hi)>>1;if(bars[m].t<t)lo=m+1;else hi=m}return lo}
-function xOf(t){return (t-view.t0)/view.msPx}
-function tOf(x){return view.t0+x*view.msPx}
-function ph(){return H-TX}
-function yOf(p){return (pMax-p)/(pMax-pMin)*ph()}
-function pOf(y){return pMax-y/ph()*(pMax-pMin)}
-function fitView(){
- var ms=ivMs(),pw=Math.max(100,W-AX),n=Math.min(bars.length,110),last=bars.length?bars[bars.length-1].t:Date.now();
- view.msPx=ms*(n+6)/pw;view.t0=last+ms*6-pw*view.msPx}
-function clampView(){
- var ms=ivMs(),pw=Math.max(100,W-AX);
- view.msPx=Math.min(Math.max(view.msPx,ms/30),ms*4000/pw);
- if(bars.length){var span=pw*view.msPx,last=bars[bars.length-1].t,first=bars[0].t;
-  if(view.t0+span>last+span*0.8)view.t0=last+span*0.8-span;
-  if(view.t0<first-span*0.6&&exhausted)view.t0=first-span*0.6}}
-function computeScale(){
- var ms=ivMs(),pw=W-AX,tR=view.t0+pw*view.msPx;
- var i0=Math.max(0,lb(view.t0-ms*2)),i1=Math.min(bars.length,lb(tR+ms)),lo=Infinity,hi=-Infinity,vm=0;
- for(var i=i0;i<i1;i++){var b=bars[i];if(b.l<lo)lo=b.l;if(b.h>hi)hi=b.h;if(b.v>vm)vm=b.v}
- if(!isFinite(lo)){if(bars.length){var b2=bars[bars.length-1];lo=b2.l;hi=b2.h}else{lo=0;hi=1}}
- if(hi-lo<1e-12)hi=lo+Math.abs(lo)*0.002+1e-6;
- vMax=vm||1;
- if(yman){pMin=yman.pMin;pMax=yman.pMax}else{var r=hi-lo;pMin=lo-r*0.3;pMax=hi+r*0.1}}
-function decs(step){var d=0;while(d<8&&Math.abs(step*Math.pow(10,d)-Math.round(step*Math.pow(10,d)))>1e-9)d++;return d}
-function niceStep(raw){var mag=Math.pow(10,Math.floor(Math.log(raw)/Math.LN10)),n=raw/mag;return (n<1.5?1:n<3?2:n<3.5?2.5:n<7?5:10)*mag}
-function pad2(n){return n<10?'0'+n:''+n}
-
-/* ---------- dibujo ---------- */
-function resize(){
- var r=stage.getBoundingClientRect();if(r.width<2||r.height<2)return;
- dpr=Math.min(window.devicePixelRatio||1,3);var w=Math.round(r.width),h=Math.round(r.height);
- if(w===W&&h===H&&cv.width===w*dpr)return;
- var first=!W;W=w;H=h;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
- if(first&&bars.length)fitView();dirty()}
-function dirty(){if(raf)return;raf=requestAnimationFrame(function(){raf=0;draw()})}
-function ema(len){var out=new Array(bars.length),k=2/(len+1),e=null;for(var i=0;i<bars.length;i++){e=e===null?bars[i].c:bars[i].c*k+e*(1-k);out[i]=e}return out}
-function sma(len){var out=new Array(bars.length),sum=0;for(var i=0;i<bars.length;i++){sum+=bars[i].c;if(i>=len)sum-=bars[i-len].c;out[i]=i>=len-1?sum/len:null}return out}
-function lineSeries(arr,color,i0,i1){var started=false;ctx.beginPath();for(var i=i0;i<i1;i++){if(arr[i]==null)continue;var x=xOf(bars[i].t),y=yOf(arr[i]);if(!started){ctx.moveTo(x,y);started=true}else ctx.lineTo(x,y)}ctx.strokeStyle=color;ctx.lineWidth=1.6;ctx.stroke()}
-
-function rayEnd(a,b){var dx=b[0]-a[0],dy=b[1]-a[1],len=Math.sqrt(dx*dx+dy*dy)||1,big=(W+H)*3;return [a[0]+dx/len*big,a[1]+dy/len*big]}
-function pxp(pt){return [xOf(pt.t),yOf(pt.p)]}
-function hex2rgba(c,a){var m=/^#([0-9a-f]{6})$/i.exec(c);if(!m)return c;var n=parseInt(m[1],16);return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')'}
-
-function drawShape(d,sel_,ghost){
- var pw=W-AX,col=d.color,a=ghost?0.8:1;ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=sel_?3:2;ctx.lineCap='round';ctx.lineJoin='round';
- var P=d.pts.map(pxp),handles=[];
- if(d.type==='hline'){var y=P[0][1];ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(pw,y);ctx.stroke()}
- else if(d.type==='vline'){var x=P[0][0];ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,ph());ctx.stroke()}
- else if(d.type==='trend'&&P.length>1){ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);ctx.lineTo(P[1][0],P[1][1]);ctx.stroke();handles=P}
- else if(d.type==='ray'&&P.length>1){var e=rayEnd(P[0],P[1]);ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);ctx.lineTo(e[0],e[1]);ctx.stroke();handles=P}
- else if(d.type==='rect'&&P.length>1){var rx=Math.min(P[0][0],P[1][0]),ry=Math.min(P[0][1],P[1][1]),rw=Math.abs(P[1][0]-P[0][0]),rh=Math.abs(P[1][1]-P[0][1]);ctx.fillStyle=hex2rgba(col,0.16);ctx.fillRect(rx,ry,rw,rh);ctx.strokeRect(rx,ry,rw,rh);handles=P}
- else if(d.type==='fib'&&P.length>1){var x0=Math.min(P[0][0],P[1][0]),x1=Math.max(P[0][0],P[1][0]),pa=d.pts[0].p,pb=d.pts[1].p;
-  ctx.font='11px system-ui,sans-serif';ctx.textBaseline='bottom';
-  FIB.forEach(function(f){var pr=pb+(pa-pb)*f,y=yOf(pr);ctx.globalAlpha=a*(f===0||f===1?1:0.75);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();ctx.globalAlpha=a;ctx.fillText(f+'  ('+fmtP(pr)+')',x0+4,y-2)});
-  ctx.globalAlpha=a*0.4;ctx.setLineDash([4,4]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);ctx.lineTo(P[1][0],P[1][1]);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=a;handles=P}
- else if(d.type==='pen'){ctx.beginPath();P.forEach(function(p,i){if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1])});ctx.stroke()}
- if(sel_){
-  if(d.type==='hline')handles=[[40,P[0][1]]];else if(d.type==='vline')handles=[[P[0][0],40]];else if(d.type==='pen')handles=[P[0],P[P.length-1]];
-  ctx.globalAlpha=1;handles.forEach(function(h){ctx.beginPath();ctx.arc(h[0],h[1],6,0,6.2832);ctx.fillStyle='#0b1422';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#fff';ctx.stroke()})}
- ctx.restore()}
-function fmtP(p){var d=Math.max(2,tick);if(Math.abs(p)>=1000)d=Math.max(2,Math.min(d,2));return p.toFixed(d)}
-
-function draw(){
- if(!W||!H)return;
- var pw=W-AX,phh=ph(),ms=ivMs();
- ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);
- if(!bars.length){return}
- clampView();computeScale();
- var tR=view.t0+pw*view.msPx,i0=Math.max(0,lb(view.t0-ms*2)-1),i1=Math.min(bars.length,lb(tR+ms)+1);
- /* rejilla de precio */
- var step=niceStep((pMax-pMin)/(phh/52));tick=decs(step);
- ctx.font='11px system-ui,sans-serif';ctx.textBaseline='middle';
- var pFirst=Math.ceil(pMin/step)*step,labelsP=[];
- ctx.save();ctx.beginPath();ctx.rect(0,0,pw,phh);ctx.clip();
- ctx.strokeStyle=GRID;ctx.lineWidth=1;
- for(var p=pFirst;p<=pMax;p+=step){var y=Math.round(yOf(p))+0.5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(pw,y);ctx.stroke();labelsP.push([p,y])}
- /* rejilla de tiempo */
- var tstep=[60,120,300,600,900,1800,3600,7200,10800,14400,21600,43200,86400,172800,259200,604800,1209600,2592000].map(function(x){return x*1000}).filter(function(x){return x/view.msPx>=84})[0]||2592000000;
- var tl=[],kT=Math.ceil((view.t0+OFF)/tstep);
- for(var loc=kT*tstep;loc-OFF<=tR;loc+=tstep){var tx=loc-OFF,x2=Math.round(xOf(tx))+0.5;ctx.beginPath();ctx.moveTo(x2,0);ctx.lineTo(x2,phh);ctx.stroke();tl.push([tx,x2,loc])}
- /* volumen */
- var bw=Math.max(1,ms/view.msPx*0.74);
- for(var i=i0;i<i1;i++){var b=bars[i],xc=xOf(b.t),vh=phh*0.16*(b.v/vMax);ctx.fillStyle=b.c>=b.o?'rgba(25,184,137,.30)':'rgba(239,89,103,.30)';ctx.fillRect(Math.round(xc-bw/2),phh-vh,Math.max(1,Math.round(bw)),vh)}
- /* velas */
- for(var j=i0;j<i1;j++){var c=bars[j],xx=xOf(c.t),up=c.c>=c.o,col=up?UP:DN,yo=yOf(c.o),yc=yOf(c.c),yh=yOf(c.h),yl=yOf(c.l);
-  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;var xr=Math.round(xx)+0.5;ctx.beginPath();ctx.moveTo(xr,yh);ctx.lineTo(xr,yl);ctx.stroke();
-  var top=Math.min(yo,yc),hh=Math.max(1,Math.abs(yc-yo));ctx.fillRect(Math.round(xx-bw/2),Math.round(top),Math.max(1,Math.round(bw)),Math.round(hh))}
- /* indicadores */
- if(st.ema)lineSeries(ema(20),'#f5c542',i0,i1);
- if(st.sma)lineSeries(sma(50),'#56a6ff',i0,i1);
- /* último precio */
- var lastB=bars[bars.length-1],ly=Math.round(yOf(lastB.c))+0.5,lcol=lastB.c>=lastB.o?UP:DN;
- ctx.setLineDash([3,3]);ctx.strokeStyle=lcol;ctx.beginPath();ctx.moveTo(0,ly);ctx.lineTo(pw,ly);ctx.stroke();ctx.setLineDash([]);
- /* dibujos */
- drawings.forEach(function(d){drawShape(d,d.id===sel,false)});
- if(draft)drawShape(draft,false,true);
- /* cursor */
- if(cross&&cross.x>=0&&cross.x<=pw&&cross.y>=0&&cross.y<=phh){ctx.strokeStyle='rgba(169,189,212,.55)';ctx.setLineDash([4,4]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cross.x,0);ctx.lineTo(cross.x,phh);ctx.moveTo(0,cross.y);ctx.lineTo(pw,cross.y);ctx.stroke();ctx.setLineDash([])}
- ctx.restore();
- /* ejes */
- ctx.fillStyle=BG;ctx.fillRect(pw,0,AX,H);ctx.fillRect(0,phh,W,TX);
- ctx.strokeStyle='#26364d';ctx.beginPath();ctx.moveTo(pw+0.5,0);ctx.lineTo(pw+0.5,phh);ctx.lineTo(0,phh+0.5);ctx.moveTo(pw,phh+0.5);ctx.lineTo(W,phh+0.5);ctx.stroke();
- ctx.fillStyle=TXT;ctx.textAlign='left';ctx.textBaseline='middle';
- labelsP.forEach(function(l){if(l[1]>8&&l[1]<phh-8)ctx.fillText(l[0].toFixed(tick),pw+6,l[1])});
- ctx.textAlign='center';
- tl.forEach(function(l){var dd=new Date(l[2]),txt;
-  if(tstep>=86400000)txt=pad2(dd.getUTCDate())+'/'+pad2(dd.getUTCMonth()+1);
-  else if(l[2]%86400000===0)txt=dd.getUTCDate()+' '+MONTHS[dd.getUTCMonth()];
-  else txt=pad2(dd.getUTCHours())+':'+pad2(dd.getUTCMinutes());
-  if(l[1]>16&&l[1]<pw-16)ctx.fillText(txt,l[1],phh+TX/2+1)});
- /* etiquetas de línea horizontal y precio actual */
- ctx.textAlign='left';
- drawings.forEach(function(d){if(d.type==='hline')tag(yOf(d.pts[0].p),fmtP(d.pts[0].p),d.color,'#0b1422')});
- tag(yOf(lastB.c),fmtP(lastB.c),lcol,'#fff');
- if(cross&&cross.x>=0&&cross.x<=pw&&cross.y>=0&&cross.y<=phh){tag(cross.y,fmtP(pOf(cross.y)),'#2c4260','#fff');
-  var tc=tOf(cross.x),dc=new Date(tc+OFF),lab=dc.getUTCDate()+' '+MONTHS[dc.getUTCMonth()]+' '+pad2(dc.getUTCHours())+':'+pad2(dc.getUTCMinutes());
-  ctx.font='11px system-ui,sans-serif';var tw=ctx.measureText(lab).width+12,tx2=Math.min(Math.max(cross.x-tw/2,0),pw-tw);ctx.fillStyle='#2c4260';ctx.fillRect(tx2,phh+1,tw,TX-2);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(lab,tx2+tw/2,phh+TX/2+1);ctx.textAlign='left'}
- /* cabecera OHLC */
- var hb=lastB;if(cross&&cross.x>=0&&cross.x<=pw){var ii=lb(tOf(cross.x));var cand=[bars[ii-1],bars[ii]].filter(Boolean);if(cand.length){hb=cand.sort(function(p1,p2){return Math.abs(p1.t-tOf(cross.x))-Math.abs(p2.t-tOf(cross.x))})[0]}}
- var chg=(hb.c-hb.o)/hb.o*100;ctx.textBaseline='top';ctx.textAlign='left';
- var ivl=(IVS.filter(function(x){return x[1]===st.iv})[0]||[st.iv])[0],up2=hb.c>=hb.o;
- ctx.font='600 12px system-ui,sans-serif';ctx.fillStyle='#e8f0fa';var head=st.sym+' · '+ivl;ctx.fillText(head,8,6);
- var hx=8+ctx.measureText(head+'   ').width;ctx.fillStyle=up2?UP:DN;ctx.fillText((chg>=0?'+':'')+chg.toFixed(2)+'%',hx,6);
- ctx.font='11px system-ui,sans-serif';ctx.fillStyle=up2?UP:DN;ctx.fillText('A '+fmtP(hb.o)+'   Máx '+fmtP(hb.h)+'   Mín '+fmtP(hb.l)+'   C '+fmtP(hb.c),8,22);
- ctx.fillStyle='#6f8399';ctx.fillText('Vol '+hb.v.toFixed(hb.v>=100?0:2),8,37);
- ctx.textBaseline='middle';
- if(view.t0<bars[0].t+ms*30)loadOlder()}
-function tag(y,txt,bg,fg){if(y<0||y>ph())return;ctx.font='11px system-ui,sans-serif';ctx.fillStyle=bg;ctx.fillRect(W-AX,y-9,AX,18);ctx.fillStyle=fg;ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillText(txt,W-AX+5,y+0.5)}
-
-/* ---------- interacción ---------- */
-function distSeg(px,py,a,b){var dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy,t=l2?((px-a[0])*dx+(py-a[1])*dy)/l2:0;t=Math.max(0,Math.min(1,t));var cx=a[0]+t*dx,cy=a[1]+t*dy;return Math.sqrt((px-cx)*(px-cx)+(py-cy)*(py-cy))}
-function handlePts(d){var P=d.pts.map(pxp);if(d.type==='hline')return [[40,P[0][1]]];if(d.type==='vline')return [[P[0][0],40]];if(d.type==='pen')return [P[0],P[P.length-1]];if(d.type==='trend'||d.type==='ray'||d.type==='rect'||d.type==='fib')return P;return []}
-function handleHit(d,x,y,tol){var h=handlePts(d);for(var i=0;i<h.length;i++){var dx=h[i][0]-x,dy=h[i][1]-y;if(dx*dx+dy*dy<=(tol+4)*(tol+4)){if(d.type==='pen')return i?d.pts.length-1:0;return i}}return -1}
-function bodyHit(d,x,y,tol){
- var P=d.pts.map(pxp);
- if(d.type==='hline')return Math.abs(y-P[0][1])<=tol;
- if(d.type==='vline')return Math.abs(x-P[0][0])<=tol;
- if(d.type==='trend')return P.length>1&&distSeg(x,y,P[0],P[1])<=tol;
- if(d.type==='ray')return P.length>1&&distSeg(x,y,P[0],rayEnd(P[0],P[1]))<=tol;
- if(d.type==='rect'){if(P.length<2)return false;var x0=Math.min(P[0][0],P[1][0])-tol,x1=Math.max(P[0][0],P[1][0])+tol,y0=Math.min(P[0][1],P[1][1])-tol,y1=Math.max(P[0][1],P[1][1])+tol;return x>=x0&&x<=x1&&y>=y0&&y<=y1}
- if(d.type==='fib'){if(P.length<2)return false;var fx0=Math.min(P[0][0],P[1][0])-tol,fx1=Math.max(P[0][0],P[1][0])+tol;if(x<fx0||x>fx1)return false;for(var i=0;i<FIB.length;i++){var pr=d.pts[1].p+(d.pts[0].p-d.pts[1].p)*FIB[i];if(Math.abs(y-yOf(pr))<=tol)return true}return false}
- if(d.type==='pen'){for(var k=1;k<P.length;k++)if(distSeg(x,y,P[k-1],P[k])<=tol)return true;return P.length===1&&Math.abs(x-P[0][0])<=tol&&Math.abs(y-P[0][1])<=tol}
- return false}
-function toPt(x,y){
- var t=tOf(x),p=pOf(y);
- if(st.magnet&&bars.length){var ms=ivMs(),j=lb(t),best=null;[bars[j-1],bars[j]].forEach(function(b){if(b&&Math.abs(b.t-t)<=ms&&(!best||Math.abs(b.t-t)<Math.abs(best.t-t)))best=b});
-  if(best){var cs=[best.o,best.h,best.l,best.c],bp=null,bd=1e9;cs.forEach(function(c){var dd=Math.abs(yOf(c)-y);if(dd<bd){bd=dd;bp=c}});if(bd<=20)return {t:best.t,p:bp}}}
- return {t:t,p:p}}
-
-var ptrs={},gest=null,pinch=null;
-function pos(e){var r=cv.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}}
-function countPtrs(){return Object.keys(ptrs).length}
-function inPlot(x,y){return x>=0&&x<W-AX&&y>=0&&y<ph()}
-function finishDraft(){
- if(!draft)return;var ok=draft.pts.length>=(TWO[draft.type]?2:1);
- if(draft.type==='pen')ok=draft.pts.length>=2;
- if(ok){pushUndo();drawings.push({id:uid(),type:draft.type,color:draft.color,pts:draft.pts});saveDr();updateUI()}
- draft=null;pending=false;dirty()}
-cv.addEventListener('pointerdown',function(e){
- if(e.pointerType==='mouse'&&e.button!==0)return;
- try{cv.setPointerCapture(e.pointerId)}catch(_){}
- var q=pos(e);ptrs[e.pointerId]={x:q.x,y:q.y,type:e.pointerType};
- if(countPtrs()===2){var k=Object.keys(ptrs),a=ptrs[k[0]],b=ptrs[k[1]];
-  pinch={d:Math.max(10,Math.hypot(a.x-b.x,a.y-b.y)),mx:(a.x+b.x)/2,msPx:view.msPx,tm:tOf((a.x+b.x)/2)};
-  gest=null;draft=null;pending=false;dirty();return}
- if(countPtrs()>2)return;
- var tol=e.pointerType==='mouse'?8:16,x=q.x,y=q.y;
- cross=null;
- if(st.tool==='select'||!inPlot(x,y)){
-  var hd=null,hi=-1;
-  if(inPlot(x,y)){var s=getSel();if(s){hi=handleHit(s,x,y,tol);if(hi>=0)hd=s}
-   if(!hd)for(var i=drawings.length-1;i>=0;i--)if(bodyHit(drawings[i],x,y,tol)){hd=drawings[i];break}}
-  if(hd){sel=hd.id;gest={kind:'drag',d:hd,hi:hi,last:{x:x,y:y},moved:false};updateUI();dirty()}
-  else gest={kind:'pan',last:{x:x,y:y},start:{x:x,y:y},moved:false,tdy:0,hadSel:!!sel}
-  return}
- var pt=toPt(x,y);cross={x:x,y:y};
- if(st.tool==='hline'||st.tool==='vline'){draft={type:st.tool,color:st.color,pts:[pt]};gest={kind:'draw1'}}
- else if(st.tool==='pen'){draft={type:'pen',color:st.color,pts:[pt]};gest={kind:'pen',last:{x:x,y:y}}}
- else{
-  if(pending&&draft){draft.pts[1]=pt;gest={kind:'draw2',second:true,start:{x:x,y:y}}}
-  else{draft={type:st.tool,color:st.color,pts:[pt,pt]};gest={kind:'draw2',second:false,start:{x:x,y:y}}}}
- dirty()});
-cv.addEventListener('pointermove',function(e){
- var q=pos(e),pp=ptrs[e.pointerId];
- if(pp){pp.x=q.x;pp.y=q.y}
- if(pinch&&countPtrs()>=2){var k=Object.keys(ptrs),a=ptrs[k[0]],b=ptrs[k[1]],d=Math.max(10,Math.hypot(a.x-b.x,a.y-b.y)),mx=(a.x+b.x)/2;
-  view.msPx=pinch.msPx*pinch.d/d;var ms=ivMs(),pwv=Math.max(100,W-AX);view.msPx=Math.min(Math.max(view.msPx,ms/30),ms*4000/pwv);view.t0=pinch.tm-mx*view.msPx;dirty();return}
- var x=q.x,y=q.y;
- if(!gest){ /* pasar el cursor (ratón) */
-  if(e.pointerType==='mouse'){cross=inPlot(x,y)?{x:x,y:y}:null;
-   if(pending&&draft&&inPlot(x,y)){draft.pts[1]=toPt(x,y)}dirty()}
-  return}
- if(gest.kind==='pan'){
-  var dx=x-gest.last.x,dy=y-gest.last.y;
-  if(Math.abs(x-gest.start.x)+Math.abs(y-gest.start.y)>6)gest.moved=true;
-  if(!gest.moved)return;
-  view.t0-=dx*view.msPx;
-  gest.tdy+=dy;
-  if(yman||Math.abs(gest.tdy)>28){if(!yman){yman={pMin:pMin,pMax:pMax}}var per=(yman.pMax-yman.pMin)/ph();yman.pMin+=dy*per;yman.pMax+=dy*per}
-  gest.last={x:x,y:y};dirty();return}
- if(gest.kind==='drag'){
-  var d=gest.d;
-  if(!gest.moved){if(Math.abs(x-gest.last.x)+Math.abs(y-gest.last.y)<3)return;gest.moved=true;pushUndo()}
-  if(gest.hi>=0){var np=toPt(x,y);if(d.type==='hline')d.pts[gest.hi]={t:d.pts[gest.hi].t,p:np.p};else if(d.type==='vline')d.pts[gest.hi]={t:np.t,p:d.pts[gest.hi].p};else d.pts[gest.hi]=np}
-  else{var dt=(x-gest.last.x)*view.msPx,per2=(pMax-pMin)/ph(),dp=-(y-gest.last.y)*per2;d.pts=d.pts.map(function(p){return {t:p.t+dt,p:p.p+dp}})}
-  gest.last={x:x,y:y};dirty();return}
- if(gest.kind==='draw1'&&draft){var p1=toPt(x,y);draft.pts[0]=p1;cross={x:x,y:y};dirty();return}
- if(gest.kind==='draw2'&&draft){draft.pts[1]=toPt(x,y);cross={x:x,y:y};dirty();return}
- if(gest.kind==='pen'&&draft){if(Math.abs(x-gest.last.x)+Math.abs(y-gest.last.y)>3){draft.pts.push(toPt(x,y));gest.last={x:x,y:y}}cross={x:x,y:y};dirty()}});
-function endPtr(e,cancel){
- var q=pos(e),was=ptrs[e.pointerId];delete ptrs[e.pointerId];
- try{cv.releasePointerCapture(e.pointerId)}catch(_){}
- if(pinch){if(countPtrs()<2)pinch=null;if(countPtrs()===0)gest=null;return}
- var gs=gest;gest=null;if(!gs)return;
- if(gs.kind==='pan'){if(!gs.moved&&gs.hadSel){sel=null;updateUI();dirty()}else if(gs.moved&&!yman)dirty();return}
- if(gs.kind==='drag'){if(gs.moved){saveDr()}dirty();return}
- if(cancel){draft=null;pending=false;dirty();return}
- if(gs.kind==='draw1'||gs.kind==='pen'){finishDraft();if(was&&was.type!=='mouse')cross=null;return}
- if(gs.kind==='draw2'){
-  var moved=Math.abs(q.x-gs.start.x)+Math.abs(q.y-gs.start.y)>12;
-  if(gs.second||moved){if(draft)draft.pts[1]=toPt(q.x,q.y);finishDraft();if(was&&was.type!=='mouse')cross=null}
-  else{pending=true;toast('Ahora toca el segundo punto')}
-  dirty()}}
-cv.addEventListener('pointerup',function(e){endPtr(e,false)});
-cv.addEventListener('pointercancel',function(e){endPtr(e,true)});
-cv.addEventListener('pointerleave',function(e){if(e.pointerType==='mouse'&&!gest){cross=null;dirty()}});
-cv.addEventListener('wheel',function(e){e.preventDefault();var q=pos(e),f=Math.exp(e.deltaY*0.0015),tm=tOf(q.x),ms=ivMs(),pwv=Math.max(100,W-AX);
- view.msPx=Math.min(Math.max(view.msPx*f,ms/30),ms*4000/pwv);view.t0=tm-q.x*view.msPx;dirty()},{passive:false});
-document.addEventListener('keydown',function(e){
- if(panel.hidden||!panel.classList.contains('own-mode'))return;
- var tg=(e.target&&e.target.tagName)||'';if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT')return;
- if(e.key==='Delete'||e.key==='Backspace'){if(sel){e.preventDefault();delSel()}}
- else if(e.key==='Escape'){draft=null;pending=false;sel=null;st.tool==='select'||setTool('select');updateUI();dirty()}
- else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();doUndo()}});
-
-/* ---------- modo y arranque ---------- */
-function ownOn(){try{return localStorage.getItem(K_ON)!=='0'}catch(_){return true}}
-function ownShow(){
- panel.classList.add('own-mode');try{localStorage.setItem(K_ON,'1')}catch(_){}
- if(!inited){inited=true;loadDr();updateUI();if('ResizeObserver' in window)new ResizeObserver(function(){resize()}).observe(stage);else window.addEventListener('resize',resize)}
- requestAnimationFrame(function(){resize();if(!busy&&!ws&&!pollT)loadBars();dirty()})}
-function ownHide(){
- panel.classList.remove('own-mode');try{localStorage.setItem(K_ON,'0')}catch(_){}
- tok++;busy=false;stopFeed();
- if(window.tvReload)window.tvReload();else if(window.initTradingView)window.initTradingView()}
-window.ownShow=ownShow;window.ownHide=ownHide;
-var btnSwitch=g('tvToOwn');if(btnSwitch)btnSwitch.addEventListener('click',function(){ownShow()});
-if(ownOn()){panel.classList.add('own-mode');if(!panel.hidden)ownShow()}
 })();
 </script></body></html>

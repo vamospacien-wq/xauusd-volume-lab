@@ -216,6 +216,11 @@ body.live-expanded{overflow:hidden;overscroll-behavior:none;position:fixed;width
 .oc-toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:#111c2eF2;border:1px solid #38516e;color:#e8eef7;padding:8px 14px;border-radius:18px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s;max-width:90%;text-align:center}
 .oc-toast.on{opacity:1}
 .livepanel.own-mode .livehead{display:none!important}
+
+.live-fs-btn.side{bottom:114px}
+.livepanel.expanded .live-fs-btn.side{bottom:max(114px,calc(env(safe-area-inset-bottom) + 102px))}
+.live-fs-btn.side.on{background:#163a46;border-color:#1aa884}
+.livepanel.own-mode .live-fs-btn.side{display:none!important}
 </style><link rel="preconnect" href="https://s3.tradingview.com" crossorigin><link rel="preconnect" href="https://s.tradingview.com" crossorigin></head>
 <body>
 <header><div class="brand"><div class="logo">VL</div><div><h1>XAUUSD · Volume Lab</h1><div class="sub">Terminal de mercado · gráfico en vivo + replay y backtesting histórico</div></div></div><div class="tag">TERMINAL · LIVE / REPLAY</div></header>
@@ -236,7 +241,7 @@ body.live-expanded{overflow:hidden;overscroll-behavior:none;position:fixed;width
   <div class="tvrow"><b>Temporalidad</b><span id="tvIvs" class="tvrow" style="margin:0"></span></div>
   <div class="tvrow"><b>Indicadores</b><span id="tvInds" class="tvrow" style="margin:0"></span></div>
   <div class="tvrow"><b>Otro símbolo</b><input id="tvCustom" type="text" autocapitalize="characters" autocomplete="off" placeholder="Ej: NASDAQ:NVDA" style="background:#0b1626;color:var(--text);border:1px solid #30445d;border-radius:16px;padding:8px 12px;min-height:34px;width:150px;font-size:12px"><button class="tvchip" id="tvCustomGo" type="button">Cargar</button></div>
-  <div class="tvrow"><b>Más</b><button class="tvchip" id="tvToOwn" type="button">✎ Gráfico con dibujos guardados</button><button class="tvchip" id="tvFull" type="button">⛶ Pantalla completa</button><button class="tvchip" id="tvNative" type="button" aria-pressed="false">Usar la barra de TradingView</button><button class="tvchip" id="tvOpenTV" type="button">Abrir en TradingView ↗</button></div>
+  <div class="tvrow"><b>Más</b><button class="tvchip" id="tvToOwn" type="button">✎ Gráfico con dibujos guardados</button><button class="tvchip" id="tvSide" type="button">Ocultar herramientas de dibujo</button><button class="tvchip" id="tvFull" type="button">⛶ Pantalla completa</button><button class="tvchip" id="tvNative" type="button" aria-pressed="false">Usar la barra de TradingView</button><button class="tvchip" id="tvOpenTV" type="button">Abrir en TradingView ↗</button></div>
   <p class="tvnote" id="tvNote">Al cambiar algo con estos botones el gráfico se vuelve a cargar. Los dibujos de este gráfico de TradingView no se pueden guardar aquí: para guardarlos usa «Gráfico con dibujos guardados».</p>
  </details>
  <div class="livewrap"><div id="tvChartContainer" class="liveframe" aria-label="Gráfico de mercado de TradingView"><div id="tvChartStatus" class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>Preparando gráfico de mercado</h2><p>El gráfico gratuito de TradingView se cargará aquí. Si no aparece, puedes abrir la terminal externa.</p></div></div><div id="ownChart" class="liveframe ownchart" aria-label="Gráfico propio con herramientas de dibujo"></div><div class="live-setup" id="liveSetup" hidden><strong>Replay del mercado</strong>
@@ -246,7 +251,7 @@ body.live-expanded{overflow:hidden;overscroll-behavior:none;position:fixed;width
 <label>Clave API de Twelve Data (solo para EUR/GBP, AUD/CAD y US100/US30/US500)<input id="lsKey" type="password" autocomplete="off" placeholder="Gratis en twelvedata.com/register"></label>
 <small>BTC/USD usa BTCUSDT de Binance (con volumen real, sin clave). EUR/GBP y AUD/CAD vienen de Twelve Data y normalmente no traen volumen real. US100, US30 y US500 usan los ETF QQQ, DIA y SPY como sustituto: su precio no coincide con el del índice y solo hay velas en horario de bolsa. La clave se guarda solo en este navegador.</small>
 <small>PAXGUSDT sigue el precio del oro y es casi igual al XAUUSD. Los datos son gratuitos, de Binance. Si cambias de temporalidad durante el Replay, se conserva el punto en el que vas.</small>
-<div class="row"><button class="btn primary" id="lsStart" type="button">▶ Iniciar Replay</button><button class="btn" id="lsCsv" type="button">Usar mi CSV</button><button class="btn" id="lsClose" type="button">✕</button></div><div id="lsMsg" role="status"></div></div><button class="live-fs-btn" id="liveFsBtn" type="button" aria-label="Pantalla completa" title="Pantalla completa">⛶</button><button class="replay-launch" id="liveReplayLaunch" type="button" aria-label="Abrir controles de Replay">◷ Replay</button></div>
+<div class="row"><button class="btn primary" id="lsStart" type="button">▶ Iniciar Replay</button><button class="btn" id="lsCsv" type="button">Usar mi CSV</button><button class="btn" id="lsClose" type="button">✕</button></div><div id="lsMsg" role="status"></div></div><button class="live-fs-btn side" id="tvSideBtn" type="button" aria-label="Mostrar u ocultar herramientas de dibujo" title="Herramientas de dibujo">✎</button><button class="live-fs-btn" id="liveFsBtn" type="button" aria-label="Pantalla completa" title="Pantalla completa">⛶</button><button class="replay-launch" id="liveReplayLaunch" type="button" aria-label="Abrir controles de Replay">◷ Replay</button></div>
  <div class="live-replay-dock"><div><strong>Replay dentro del gráfico</strong><span>Abre tus velas CSV en este mismo espacio, con volumen visible, reproducción, avance por vela y control de velocidad. Para repetir el histórico de un mercado en vivo, primero carga sus datos CSV.</span></div><button class="btn primary" id="liveReplayCsv" type="button">▶ Replay en este gráfico</button><button class="btn" id="liveReplayGo" type="button">Replay nativo GoCharting ↗</button></div><button class="btn live-return" id="returnLiveChart" type="button" hidden>↶ Volver a mercado en vivo</button><div id="liveReplayMount"></div><div class="livefoot">Gráfico de TradingView integrado mediante su widget gratuito. La disponibilidad de símbolos, indicadores y datos en tiempo real depende de TradingView y de su proveedor. El Replay y el backtesting CSV funcionan de forma independiente.</div>
 </section>
 <main id="goldMain" class="goldwrap" hidden>
@@ -625,14 +630,14 @@ const TV_SYMBOLS=[['Oro','OANDA:XAUUSD'],['Bitcoin','BITSTAMP:BTCUSD'],['Nasdaq'
 const TV_IVS=[['1m','1'],['5m','5'],['15m','15'],['30m','30'],['1h','60'],['4h','240'],['1D','D']];
 const TV_IND={vol:['Volumen','Volume@tv-basicstudies'],ema:['EMA 20','MAExp@tv-basicstudies'],sma:['SMA 50','MASimple@tv-basicstudies'],rsi:['RSI','RSI@tv-basicstudies'],macd:['MACD','MACD@tv-basicstudies'],bb:['Bollinger','BB@tv-basicstudies'],vwap:['VWAP','VWAP@tv-basicstudies']};
 const TV_KEY='xvl-tv-state';
-let tvState={symbol:'OANDA:XAUUSD',interval:'60',inds:['vol'],native:false};
-try{const sv=JSON.parse(localStorage.getItem(TV_KEY)||'null');if(sv&&typeof sv==='object'){if(typeof sv.symbol==='string'&&sv.symbol)tvState.symbol=sv.symbol;if(TV_IVS.some(x=>x[1]===sv.interval))tvState.interval=sv.interval;if(Array.isArray(sv.inds))tvState.inds=sv.inds.filter(k=>TV_IND[k]);tvState.native=!!sv.native}}catch(_){}
+let tvState={symbol:'OANDA:XAUUSD',interval:'60',inds:['vol'],native:false,hideSide:false};
+try{const sv=JSON.parse(localStorage.getItem(TV_KEY)||'null');if(sv&&typeof sv==='object'){if(typeof sv.symbol==='string'&&sv.symbol)tvState.symbol=sv.symbol;if(TV_IVS.some(x=>x[1]===sv.interval))tvState.interval=sv.interval;if(Array.isArray(sv.inds))tvState.inds=sv.inds.filter(k=>TV_IND[k]);tvState.native=!!sv.native;tvState.hideSide=!!sv.hideSide}}catch(_){}
 function tvSave(){try{localStorage.setItem(TV_KEY,JSON.stringify(tvState))}catch(_){}}
 let tvWidget=null,tvScriptLoading=false,tvScriptReady=false;
 function initTradingView(){if(ownIsOn()){window.ownShow&&window.ownShow();return}if(tvWidget){return}const container=$('tvChartContainer');if(!container)return;const status=$('tvChartStatus');if(status)status.remove();if(!window.TradingView){if(tvScriptLoading)return;tvScriptLoading=true;const script=document.createElement('script');script.src='https://s3.tradingview.com/tv.js';script.async=true;script.onload=()=>{tvScriptReady=true;tvScriptLoading=false;createTradingViewWidget()};script.onerror=()=>{tvScriptLoading=false;container.innerHTML='<div class="gocharting-fallback"><div class="fallback-mark">TV</div><h2>No se pudo cargar TradingView</h2><p>Comprueba tu conexión e inténtalo de nuevo, o abre GoCharting externamente.</p><button class="btn primary" id="openGoChartingMain" type="button">Abrir GoCharting ↗</button></div>';$('openGoChartingMain')?.addEventListener('click',()=>window.open(goChartingUrl(),'_blank','noopener'))};document.head.appendChild(script);return}createTradingViewWidget()}
 function tvStudies(){return tvState.inds.map(k=>TV_IND[k][1])}
 function tvOverrides(){return{'moving average exponential.length':20,'moving average.length':50}}
-function createTradingViewWidget(){if(tvWidget||!window.TradingView)return;const container=$('tvChartContainer');container.innerHTML='<div id="tv_chart_inner" style="width:100%;height:100%;min-height:430px"></div>';tvWidget=new TradingView.widget({container_id:'tv_chart_inner',autosize:true,symbol:tvState.symbol,interval:tvState.interval,timezone:'America/Bogota',theme:'dark',style:'1',locale:'es',toolbar_bg:'#111c2e',enable_publishing:false,allow_symbol_change:tvState.native,hide_top_toolbar:!tvState.native,hide_side_toolbar:false,details:false,hotlist:false,calendar:false,withdateranges:true,save_image:false,studies:tvStudies(),studies_overrides:tvOverrides(),support_host:'https://www.tradingview.com'})}
+function createTradingViewWidget(){if(tvWidget||!window.TradingView)return;const container=$('tvChartContainer');container.innerHTML='<div id="tv_chart_inner" style="width:100%;height:100%;min-height:430px"></div>';tvWidget=new TradingView.widget({container_id:'tv_chart_inner',autosize:true,symbol:tvState.symbol,interval:tvState.interval,timezone:'America/Bogota',theme:'dark',style:'1',locale:'es',toolbar_bg:'#111c2e',enable_publishing:false,allow_symbol_change:tvState.native,hide_top_toolbar:!tvState.native,hide_side_toolbar:!!tvState.hideSide,details:false,hotlist:false,calendar:false,withdateranges:true,save_image:false,studies:tvStudies(),studies_overrides:tvOverrides(),support_host:'https://www.tradingview.com'})}
 function tvReload(){tvWidget=null;const c=$('tvChartContainer');if(c)c.innerHTML='';initTradingView()}
 window.tvReload=tvReload;window.initTradingView=initTradingView;
 function tvChip(label,on,fn){const b=document.createElement('button');b.type='button';b.className='tvchip'+(on?' on':'');b.textContent=label;b.setAttribute('aria-pressed',String(!!on));b.onclick=fn;return b}
@@ -640,13 +645,15 @@ function tvRender(){const f=(id,items)=>{const el=$(id);el.textContent='';items.
  f('tvSyms',TV_SYMBOLS.map(([l,v])=>tvChip(l,tvState.symbol===v,()=>{tvState.symbol=v;$('liveSymbol').value=v;tvSave();tvRender();tvReload()})));
  f('tvIvs',TV_IVS.map(([l,v])=>tvChip(l,tvState.interval===v,()=>{tvState.interval=v;tvSave();tvRender();tvReload()})));
  f('tvInds',Object.keys(TV_IND).map(k=>tvChip(TV_IND[k][0],tvState.inds.includes(k),()=>{tvState.inds=tvState.inds.includes(k)?tvState.inds.filter(x=>x!==k):tvState.inds.concat(k);tvSave();tvRender();tvReload()})));
- $('tvNative').classList.toggle('on',tvState.native);$('tvNative').setAttribute('aria-pressed',String(tvState.native));
+ $('tvSide').classList.toggle('on',tvState.hideSide);$('tvSide').textContent=tvState.hideSide?'Mostrar herramientas de dibujo':'Ocultar herramientas de dibujo';$('tvSideBtn').classList.toggle('on',tvState.hideSide);$('tvNative').classList.toggle('on',tvState.native);$('tvNative').setAttribute('aria-pressed',String(tvState.native));
  $('tvNote').textContent=tvState.native?'Barra de TradingView activa: lo que cambies dentro del gráfico (instrumento, temporalidad, indicadores) NO se recuerda al actualizar la página.':'Al cambiar algo con estos botones el gráfico se vuelve a cargar. Los dibujos de este gráfico de TradingView no se pueden guardar aquí: para guardarlos usa «Gráfico con dibujos guardados».';
  $('liveSymbol').value=tvState.symbol;
  const sn=(TV_SYMBOLS.find(x=>x[1]===tvState.symbol)||[tvState.symbol])[0],iv=(TV_IVS.find(x=>x[1]===tvState.interval)||['',''])[0];
  $('tvSummary').textContent='⚙ '+sn+' · '+iv+(tvState.inds.length?' · '+tvState.inds.map(k=>TV_IND[k][0]).join(', '):'')+' ▾'}
 $('tvNative').onclick=()=>{tvState.native=!tvState.native;tvSave();tvRender();tvReload()};
 $('tvFull').onclick=()=>setExpandedChart('live');
+function tvToggleSide(){tvState.hideSide=!tvState.hideSide;tvSave();tvRender();tvReload()}
+$('tvSide').onclick=tvToggleSide;$('tvSideBtn').onclick=tvToggleSide;
 function tvCustomLoad(){const v=($('tvCustom').value||'').trim().toUpperCase().replace(/\s+/g,'');if(!v)return;tvState.symbol=tradingViewSymbol(v);$('tvCustom').value='';tvSave();tvRender();tvReload()}
 $('tvCustomGo').onclick=tvCustomLoad;$('tvCustom').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();tvCustomLoad()}});
 $('tvOpenTV').onclick=()=>window.open('https://www.tradingview.com/chart/?symbol='+encodeURIComponent(tvState.symbol)+'&interval='+encodeURIComponent(tvState.interval),'_blank','noopener');
@@ -841,7 +848,7 @@ var K_ON='xvl-own-v2',K_ST='xvl-own-state',K_DR='xvl-own-draw:';
 var SYMS=[['Oro','PAXGUSDT'],['Bitcoin','BTCUSDT'],['Ethereum','ETHUSDT'],['Solana','SOLUSDT']];
 var IVS=[['1m','1m',60000],['5m','5m',300000],['15m','15m',900000],['30m','30m',1800000],['1h','1h',3600000],['4h','4h',14400000],['1D','1d',86400000]];
 var COLORS=['#f5c542','#56a6ff','#19b889','#ef5967','#ffffff','#c084fc'];
-var TOOLS=[['select','✋','Mover'],['trend','╱','Tendencia'],['ray','➚','Rayo'],['hline','―','Horizontal'],['vline','│','Vertical'],['rect','▭','Rectángulo'],['fib','Fib','Fibonacci'],['pen','✎','Lápiz']];
+var TOOLS=[['select','✋','Mover'],['trend','╱','Tendencia'],['ray','➚','Rayo'],['hline','―','Horizontal'],['vline','│','Vertical'],['rect','▭','Rectángulo'],['fib','Fib','Fibonacci'],['pen','✎','Lápiz'],['long','▲','Larga'],['short','▼','Corta']];
 var TWO={trend:1,ray:1,rect:1,fib:1};
 var FIB=[0,0.236,0.382,0.5,0.618,0.786,1];
 var MONTHS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -909,6 +916,7 @@ function setTool(t){st.tool=t;draft=null;pending=false;if(t!=='select')sel=null;
  if(t==='trend'||t==='ray'||t==='rect'||t==='fib')toast('Toca dos puntos, o arrastra de uno a otro');
  else if(t==='hline'||t==='vline')toast('Toca o arrastra para colocar la línea');
  else if(t==='pen')toast('Dibuja con el dedo');
+ else if(t==='long'||t==='short')toast('Toca donde quieres la entrada; arrastra sus puntos para ajustar');
  else if(t==='select')toast('Toca un dibujo para moverlo; dos dedos para zoom')}
 function setSym(s){if(s===st.sym&&bars.length)return;st.sym=s;saveSt();loadDr();updateUI();loadBars()}
 function setIv(v){if(v===st.iv&&bars.length)return;st.iv=v;saveSt();updateUI();loadBars()}
@@ -959,7 +967,7 @@ function fallbackPoll(my){
  pollT=setInterval(function(){jget('klines?symbol='+encodeURIComponent(st.sym)+'&interval='+st.iv+'&limit=2').then(function(a){if(my!==tok)return;a.map(mapK).forEach(applyK)}).catch(function(){})},4000)}
 
 /* ---------- dibujos (guardado) ---------- */
-function validD(d){return d&&typeof d==='object'&&/^(trend|ray|hline|vline|rect|fib|pen)$/.test(d.type)&&typeof d.color==='string'&&Array.isArray(d.pts)&&d.pts.length>0&&d.pts.every(function(p){return p&&isFinite(p.t)&&isFinite(p.p)})}
+function validD(d){return d&&typeof d==='object'&&/^(trend|ray|hline|vline|rect|fib|pen|long|short)$/.test(d.type)&&typeof d.color==='string'&&Array.isArray(d.pts)&&d.pts.length>0&&d.pts.every(function(p){return p&&isFinite(p.t)&&isFinite(p.p)})}
 function loadDr(){try{var a=JSON.parse(localStorage.getItem(K_DR+st.sym)||'[]');drawings=Array.isArray(a)?a.filter(validD):[]}catch(_){drawings=[]}sel=null;undo=[];draft=null;pending=false}
 function saveDr(){try{localStorage.setItem(K_DR+st.sym,JSON.stringify(drawings))}catch(_){toast('No se pudo guardar en este navegador')}}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -1009,6 +1017,10 @@ function ema(len){var out=new Array(bars.length),k=2/(len+1),e=null;for(var i=0;
 function sma(len){var out=new Array(bars.length),sum=0;for(var i=0;i<bars.length;i++){sum+=bars[i].c;if(i>=len)sum-=bars[i-len].c;out[i]=i>=len-1?sum/len:null}return out}
 function lineSeries(arr,color,i0,i1){var started=false;ctx.beginPath();for(var i=i0;i<i1;i++){if(arr[i]==null)continue;var x=xOf(bars[i].t),y=yOf(arr[i]);if(!started){ctx.moveTo(x,y);started=true}else ctx.lineTo(x,y)}ctx.strokeStyle=color;ctx.lineWidth=1.6;ctx.stroke()}
 
+function makePos(type,pt){
+ var ms=ivMs(),n=Math.min(20,bars.length),sum=0;for(var i=bars.length-n;i<bars.length;i++)sum+=bars[i].h-bars[i].l;
+ var risk=Math.max(n?sum/n*1.5:0,Math.abs(pt.p)*0.0005),dir=type==='long'?1:-1,te=pt.t+ms*18;
+ return [{t:pt.t,p:pt.p},{t:te,p:pt.p+dir*risk*2},{t:te,p:pt.p-dir*risk}]}
 function rayEnd(a,b){var dx=b[0]-a[0],dy=b[1]-a[1],len=Math.sqrt(dx*dx+dy*dy)||1,big=(W+H)*3;return [a[0]+dx/len*big,a[1]+dy/len*big]}
 function pxp(pt){return [xOf(pt.t),yOf(pt.p)]}
 function hex2rgba(c,a){var m=/^#([0-9a-f]{6})$/i.exec(c);if(!m)return c;var n=parseInt(m[1],16);return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')'}
@@ -1026,6 +1038,16 @@ function drawShape(d,sel_,ghost){
   FIB.forEach(function(f){var pr=pb+(pa-pb)*f,y=yOf(pr);ctx.globalAlpha=a*(f===0||f===1?1:0.75);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();ctx.globalAlpha=a;ctx.fillText(f+'  ('+fmtP(pr)+')',x0+4,y-2)});
   ctx.globalAlpha=a*0.4;ctx.setLineDash([4,4]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);ctx.lineTo(P[1][0],P[1][1]);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=a;handles=P}
  else if(d.type==='pen'){ctx.beginPath();P.forEach(function(p,i){if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1])});ctx.stroke()}
+ else if((d.type==='long'||d.type==='short')&&P.length>2){
+  var gx0=Math.min(P[0][0],P[1][0]),gw=Math.abs(P[1][0]-P[0][0]),yE=P[0][1],yT=P[1][1],yS=P[2][1],pe=d.pts[0].p,pt_=d.pts[1].p,ps=d.pts[2].p;
+  ctx.fillStyle='rgba(25,184,137,.22)';ctx.fillRect(gx0,Math.min(yE,yT),gw,Math.abs(yT-yE));
+  ctx.fillStyle='rgba(239,89,103,.22)';ctx.fillRect(gx0,Math.min(yE,yS),gw,Math.abs(yS-yE));
+  ctx.lineWidth=1.5;[[yE,'#cbd8e8'],[yT,UP],[yS,DN]].forEach(function(l){ctx.strokeStyle=l[1];ctx.beginPath();ctx.moveTo(gx0,l[0]);ctx.lineTo(gx0+gw,l[0]);ctx.stroke()});
+  var rr=Math.abs(pt_-pe)/(Math.abs(pe-ps)||1e-9),pc=function(v){return ((v-pe)/pe*100).toFixed(2)+'%'};
+  ctx.font='600 11px system-ui,sans-serif';ctx.textBaseline='bottom';ctx.fillStyle='#e8f0fa';ctx.fillText((d.type==='long'?'Larga':'Corta')+' · R:R '+rr.toFixed(2),gx0+4,yE-3);
+  ctx.fillStyle=UP;ctx.textBaseline=yT<yE?'top':'bottom';ctx.fillText('TP '+fmtP(pt_)+' ('+pc(pt_)+')',gx0+4,yT+(yT<yE?3:-3));
+  ctx.fillStyle=DN;ctx.textBaseline=yS<yE?'top':'bottom';ctx.fillText('SL '+fmtP(ps)+' ('+pc(ps)+')',gx0+4,yS+(yS<yE?3:-3));
+  handles=P}
  if(sel_){
   if(d.type==='hline')handles=[[40,P[0][1]]];else if(d.type==='vline')handles=[[P[0][0],40]];else if(d.type==='pen')handles=[P[0],P[P.length-1]];
   ctx.globalAlpha=1;handles.forEach(function(h){ctx.beginPath();ctx.arc(h[0],h[1],6,0,6.2832);ctx.fillStyle='#0b1422';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#fff';ctx.stroke()})}
@@ -1101,7 +1123,7 @@ function tag(y,txt,bg,fg){if(y<0||y>ph())return;ctx.font='11px system-ui,sans-se
 
 /* ---------- interacción ---------- */
 function distSeg(px,py,a,b){var dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy,t=l2?((px-a[0])*dx+(py-a[1])*dy)/l2:0;t=Math.max(0,Math.min(1,t));var cx=a[0]+t*dx,cy=a[1]+t*dy;return Math.sqrt((px-cx)*(px-cx)+(py-cy)*(py-cy))}
-function handlePts(d){var P=d.pts.map(pxp);if(d.type==='hline')return [[40,P[0][1]]];if(d.type==='vline')return [[P[0][0],40]];if(d.type==='pen')return [P[0],P[P.length-1]];if(d.type==='trend'||d.type==='ray'||d.type==='rect'||d.type==='fib')return P;return []}
+function handlePts(d){var P=d.pts.map(pxp);if(d.type==='long'||d.type==='short')return P;if(d.type==='hline')return [[40,P[0][1]]];if(d.type==='vline')return [[P[0][0],40]];if(d.type==='pen')return [P[0],P[P.length-1]];if(d.type==='trend'||d.type==='ray'||d.type==='rect'||d.type==='fib')return P;return []}
 function handleHit(d,x,y,tol){var h=handlePts(d);for(var i=0;i<h.length;i++){var dx=h[i][0]-x,dy=h[i][1]-y;if(dx*dx+dy*dy<=(tol+4)*(tol+4)){if(d.type==='pen')return i?d.pts.length-1:0;return i}}return -1}
 function bodyHit(d,x,y,tol){
  var P=d.pts.map(pxp);
@@ -1111,6 +1133,7 @@ function bodyHit(d,x,y,tol){
  if(d.type==='ray')return P.length>1&&distSeg(x,y,P[0],rayEnd(P[0],P[1]))<=tol;
  if(d.type==='rect'){if(P.length<2)return false;var x0=Math.min(P[0][0],P[1][0])-tol,x1=Math.max(P[0][0],P[1][0])+tol,y0=Math.min(P[0][1],P[1][1])-tol,y1=Math.max(P[0][1],P[1][1])+tol;return x>=x0&&x<=x1&&y>=y0&&y<=y1}
  if(d.type==='fib'){if(P.length<2)return false;var fx0=Math.min(P[0][0],P[1][0])-tol,fx1=Math.max(P[0][0],P[1][0])+tol;if(x<fx0||x>fx1)return false;for(var i=0;i<FIB.length;i++){var pr=d.pts[1].p+(d.pts[0].p-d.pts[1].p)*FIB[i];if(Math.abs(y-yOf(pr))<=tol)return true}return false}
+ if(d.type==='long'||d.type==='short'){if(P.length<3)return false;var qx0=Math.min(P[0][0],P[1][0])-tol,qx1=Math.max(P[0][0],P[1][0])+tol,qy0=Math.min(P[1][1],P[2][1])-tol,qy1=Math.max(P[1][1],P[2][1])+tol;return x>=qx0&&x<=qx1&&y>=qy0&&y<=qy1}
  if(d.type==='pen'){for(var k=1;k<P.length;k++)if(distSeg(x,y,P[k-1],P[k])<=tol)return true;return P.length===1&&Math.abs(x-P[0][0])<=tol&&Math.abs(y-P[0][1])<=tol}
  return false}
 function toPt(x,y){
@@ -1146,7 +1169,7 @@ cv.addEventListener('pointerdown',function(e){
   else gest={kind:'pan',last:{x:x,y:y},start:{x:x,y:y},moved:false,tdy:0,hadSel:!!sel}
   return}
  var pt=toPt(x,y);cross={x:x,y:y};
- if(st.tool==='hline'||st.tool==='vline'){draft={type:st.tool,color:st.color,pts:[pt]};gest={kind:'draw1'}}
+ if(st.tool==='hline'||st.tool==='vline'||st.tool==='long'||st.tool==='short'){draft={type:st.tool,color:st.color,pts:(st.tool==='long'||st.tool==='short')?makePos(st.tool,pt):[pt]};gest={kind:'draw1'}}
  else if(st.tool==='pen'){draft={type:'pen',color:st.color,pts:[pt]};gest={kind:'pen',last:{x:x,y:y}}}
  else{
   if(pending&&draft){draft.pts[1]=pt;gest={kind:'draw2',second:true,start:{x:x,y:y}}}
@@ -1173,10 +1196,10 @@ cv.addEventListener('pointermove',function(e){
  if(gest.kind==='drag'){
   var d=gest.d;
   if(!gest.moved){if(Math.abs(x-gest.last.x)+Math.abs(y-gest.last.y)<3)return;gest.moved=true;pushUndo()}
-  if(gest.hi>=0){var np=toPt(x,y);if(d.type==='hline')d.pts[gest.hi]={t:d.pts[gest.hi].t,p:np.p};else if(d.type==='vline')d.pts[gest.hi]={t:np.t,p:d.pts[gest.hi].p};else d.pts[gest.hi]=np}
+  if(gest.hi>=0){var np=toPt(x,y);if(d.type==='hline')d.pts[gest.hi]={t:d.pts[gest.hi].t,p:np.p};else if(d.type==='vline')d.pts[gest.hi]={t:np.t,p:d.pts[gest.hi].p};else if(d.type==='long'||d.type==='short'){if(gest.hi===0){var ddt=np.t-d.pts[0].t,ddp=np.p-d.pts[0].p;d.pts=d.pts.map(function(p){return {t:p.t+ddt,p:p.p+ddp}})}else if(gest.hi===1){d.pts[1]={t:np.t,p:np.p};d.pts[2]={t:np.t,p:d.pts[2].p}}else{d.pts[2]={t:np.t,p:np.p};d.pts[1]={t:np.t,p:d.pts[1].p}}}else d.pts[gest.hi]=np}
   else{var dt=(x-gest.last.x)*view.msPx,per2=(pMax-pMin)/ph(),dp=-(y-gest.last.y)*per2;d.pts=d.pts.map(function(p){return {t:p.t+dt,p:p.p+dp}})}
   gest.last={x:x,y:y};dirty();return}
- if(gest.kind==='draw1'&&draft){var p1=toPt(x,y);draft.pts[0]=p1;cross={x:x,y:y};dirty();return}
+ if(gest.kind==='draw1'&&draft){var p1=toPt(x,y);if(draft.type==='long'||draft.type==='short')draft.pts=makePos(draft.type,p1);else draft.pts[0]=p1;cross={x:x,y:y};dirty();return}
  if(gest.kind==='draw2'&&draft){draft.pts[1]=toPt(x,y);cross={x:x,y:y};dirty();return}
  if(gest.kind==='pen'&&draft){if(Math.abs(x-gest.last.x)+Math.abs(y-gest.last.y)>3){draft.pts.push(toPt(x,y));gest.last={x:x,y:y}}cross={x:x,y:y};dirty()}});
 function endPtr(e,cancel){

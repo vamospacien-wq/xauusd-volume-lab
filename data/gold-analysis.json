@@ -1,10 +1,10 @@
 {
   "ready": true,
-  "generated_at_utc": "2026-11-28T10:40:13+00:00",
-  "generated_at_bogota": "2026-11-28T05:40:13-05:00",
+  "generated_at_utc": "2026-11-28T13:36:07+00:00",
+  "generated_at_bogota": "2026-11-28T08:36:07-05:00",
   "source": "Binance PAXGUSDT (proxy del oro; puede diferir del spot XAUUSD)",
-  "price": 3651.44,
-  "change_24h_pct": -0.45,
+  "price": 3647.11,
+  "change_24h_pct": 0.34,
   "bias": "bajista",
   "score": -4,
   "trend": {
@@ -18,7 +18,7 @@
     "rsi_daily": 40.3,
     "rsi_4h": 59.0,
     "atr_daily": 93.29,
-    "atr_4h": 36.13,
+    "atr_4h": 33.9,
     "volume_ratio": 1.05
   },
   "levels": {
@@ -35,23 +35,16 @@
   },
   "signal": {
     "side": "venta",
-    "entry": 3651.44,
-    "sl": 3687.57,
-    "tp1": 3597.24,
-    "tp2": 3561.11,
+    "entry": 3647.11,
+    "sl": 3681.01,
+    "tp1": 3596.27,
+    "tp2": 3562.37,
     "rr1": 1.5,
     "basis": "Riesgo = 1 ATR(14) en 4h"
   },
   "chart": {
     "interval": "4h",
     "candles": [
-      [
-        1794988800000,
-        3770.05,
-        3782.03,
-        3754.26,
-        3758.48
-      ],
       [
         1795003200000,
         3760.0,
@@ -464,27 +457,27 @@
         3654.42,
         3641.79,
         3649.97
+      ],
+      [
+        1795852800000,
+        3649.97,
+        3651.84,
+        3647.04,
+        3649.85
       ]
     ]
   },
   "plan": [
     "Sesgo bajista: prioriza ventas en rebotes hacia el pivote o la EMA20; evita perseguir el precio.",
-    "Asia: rango 3641.79–3660.08 (18.29 USD, -0.14%). El precio está dentro de ese rango.",
-    "Londres sigue dentro del rango asiático: aún no hay dirección definida.",
-    "Nueva York abre a las 8:00 a. m. (Bogotá): suele traer el movimiento más fuerte del día.",
     "Sin eventos de USD de impacto alto hoy.",
     "Vigila máx. de ayer en 3673.0 arriba y Pivote en 3626.39 abajo."
   ],
   "sessions": [
     {
       "name": "Asia (Tokio)",
-      "status": "cerrada",
+      "status": "pendiente",
       "opens": "7:00 p. m.",
-      "closes": "4:00 a. m.",
-      "high": 3660.08,
-      "low": 3641.79,
-      "change_pct": -0.14,
-      "range": 18.29
+      "closes": "4:00 a. m."
     },
     {
       "name": "Londres",
@@ -493,14 +486,18 @@
       "closes": "12:00 p. m.",
       "high": 3651.84,
       "low": 3647.04,
-      "change_pct": 0.04,
+      "change_pct": -0.08,
       "range": 4.8
     },
     {
       "name": "Nueva York",
-      "status": "pendiente",
+      "status": "en curso",
       "opens": "8:00 a. m.",
-      "closes": "5:00 p. m."
+      "closes": "5:00 p. m.",
+      "high": 3651.51,
+      "low": 3647.11,
+      "change_pct": -0.09,
+      "range": 4.4
     }
   ],
   "events_ok": true,
@@ -509,7 +506,7 @@
   "events_source": "Forex Factory (feed gratuito de Fair Economy) · USD, impacto medio y alto · hora de Bogotá",
   "summary": [
     "Sesgo bajista (puntuación -4 de ±6). Diario: tendencia bajista; 4h: bajista.",
-    "Precio 3651.44 frente a EMA20 3727.96, EMA50 3903.06 y EMA200 4251.72 en diario.",
+    "Precio 3647.11 frente a EMA20 3727.96, EMA50 3903.06 y EMA200 4251.72 en diario.",
     "RSI(14): 40 en diario y 59 en 4h. ATR diario ≈ 93.29 USD.",
     "Volumen de ayer: 1.05× el promedio de 20 días.",
     "Pivote 3626.39; resistencias 3700.79 / 3747.39; soportes 3579.79 / 3505.39."

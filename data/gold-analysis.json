@@ -1,10 +1,10 @@
 {
   "ready": true,
-  "generated_at_utc": "2026-11-27T23:41:35+00:00",
-  "generated_at_bogota": "2026-11-27T18:41:35-05:00",
+  "generated_at_utc": "2026-11-28T03:22:58+00:00",
+  "generated_at_bogota": "2026-11-27T22:22:58-05:00",
   "source": "Binance PAXGUSDT (proxy del oro; puede diferir del spot XAUUSD)",
-  "price": 3654.47,
-  "change_24h_pct": 2.61,
+  "price": 3652.98,
+  "change_24h_pct": 0.87,
   "bias": "bajista",
   "score": -4,
   "trend": {
@@ -12,46 +12,39 @@
     "h4": "bajista"
   },
   "indicators": {
-    "ema20": 3735.73,
-    "ema50": 3913.22,
-    "ema200": 4258.04,
-    "rsi_daily": 31.2,
-    "rsi_4h": 58.9,
-    "atr_daily": 91.16,
-    "atr_4h": 42.11,
-    "volume_ratio": 0.57
+    "ema20": 3727.96,
+    "ema50": 3903.06,
+    "ema200": 4251.72,
+    "rsi_daily": 40.3,
+    "rsi_4h": 59.9,
+    "atr_daily": 93.29,
+    "atr_4h": 39.93,
+    "volume_ratio": 1.05
   },
   "levels": {
-    "pivot": 3570.81,
-    "r1": 3593.71,
-    "r2": 3625.96,
-    "s1": 3538.56,
-    "s2": 3515.66,
+    "pivot": 3626.39,
+    "r1": 3700.79,
+    "r2": 3747.39,
+    "s1": 3579.79,
+    "s2": 3505.39,
     "high20": 4133.99,
     "low20": 3425.17,
-    "prev_high": 3603.06,
-    "prev_low": 3547.91,
-    "prev_close": 3561.46
+    "prev_high": 3673.0,
+    "prev_low": 3552.0,
+    "prev_close": 3654.18
   },
   "signal": {
     "side": "venta",
-    "entry": 3654.47,
-    "sl": 3696.58,
-    "tp1": 3591.3,
-    "tp2": 3549.19,
+    "entry": 3652.98,
+    "sl": 3692.91,
+    "tp1": 3593.09,
+    "tp2": 3553.16,
     "rr1": 1.5,
     "basis": "Riesgo = 1 ATR(14) en 4h"
   },
   "chart": {
     "interval": "4h",
     "candles": [
-      [
-        1794945600000,
-        3838.74,
-        3849.96,
-        3834.93,
-        3842.87
-      ],
       [
         1794960000000,
         3841.07,
@@ -464,20 +457,33 @@
         3646.87,
         3607.72,
         3646.6
+      ],
+      [
+        1795809600000,
+        3646.6,
+        3655.99,
+        3644.48,
+        3654.18
       ]
     ]
   },
   "plan": [
     "Sesgo bajista: prioriza ventas en rebotes hacia el pivote o la EMA20; evita perseguir el precio.",
+    "Asia: rango 3647.96–3660.08 (12.12 USD, -0.03%). El precio está dentro de ese rango.",
+    "Nueva York abre a las 8:00 a. m. (Bogotá): suele traer el movimiento más fuerte del día.",
     "Sin eventos de USD de impacto alto hoy.",
-    "Vigila máx. 20 d en 4133.99 arriba y R2 en 3625.96 abajo."
+    "Vigila máx. de ayer en 3673.0 arriba y Pivote en 3626.39 abajo."
   ],
   "sessions": [
     {
       "name": "Asia (Tokio)",
-      "status": "pendiente",
+      "status": "en curso",
       "opens": "7:00 p. m.",
-      "closes": "4:00 a. m."
+      "closes": "4:00 a. m.",
+      "high": 3660.08,
+      "low": 3647.96,
+      "change_pct": -0.03,
+      "range": 12.12
     },
     {
       "name": "Londres",
@@ -487,13 +493,9 @@
     },
     {
       "name": "Nueva York",
-      "status": "cerrada",
+      "status": "pendiente",
       "opens": "8:00 a. m.",
-      "closes": "5:00 p. m.",
-      "high": 3661.16,
-      "low": 3604.41,
-      "change_pct": -0.38,
-      "range": 56.75
+      "closes": "5:00 p. m."
     }
   ],
   "events_ok": true,
@@ -502,19 +504,19 @@
   "events_source": "Forex Factory (feed gratuito de Fair Economy) · USD, impacto medio y alto · hora de Bogotá",
   "summary": [
     "Sesgo bajista (puntuación -4 de ±6). Diario: tendencia bajista; 4h: bajista.",
-    "Precio 3654.47 frente a EMA20 3735.73, EMA50 3913.22 y EMA200 4258.04 en diario.",
-    "RSI(14): 31 en diario y 59 en 4h. ATR diario ≈ 91.16 USD.",
-    "Volumen de ayer: 0.57× el promedio de 20 días.",
-    "Pivote 3570.81; resistencias 3593.71 / 3625.96; soportes 3538.56 / 3515.66."
+    "Precio 3652.98 frente a EMA20 3727.96, EMA50 3903.06 y EMA200 4251.72 en diario.",
+    "RSI(14): 40 en diario y 60 en 4h. ATR diario ≈ 93.29 USD.",
+    "Volumen de ayer: 1.05× el promedio de 20 días.",
+    "Pivote 3626.39; resistencias 3700.79 / 3747.39; soportes 3579.79 / 3505.39."
   ],
   "scenarios": [
     {
       "name": "Escenario alcista",
-      "text": "Cierre de 4h sobre 3593.71 abre camino a 3625.96. Se invalida con cierre bajo 3570.81."
+      "text": "Cierre de 4h sobre 3700.79 abre camino a 3747.39. Se invalida con cierre bajo 3626.39."
     },
     {
       "name": "Escenario bajista",
-      "text": "Cierre de 4h bajo 3538.56 abre camino a 3515.66. Se invalida con cierre sobre 3570.81."
+      "text": "Cierre de 4h bajo 3579.79 abre camino a 3505.39. Se invalida con cierre sobre 3626.39."
     }
   ],
   "notes": [
